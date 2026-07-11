@@ -112,8 +112,8 @@ export default definePreset(Aura, {
           activeColor: '{primary.700}'
         },
         highlight: {
-          background: 'rgba(236, 72, 153, 0.08)',
-          focusBackground: 'rgba(236, 72, 153, 0.14)',
+          background: 'rgba(236, 72, 153, 0.16)',
+          focusBackground: 'rgba(236, 72, 153, 0.22)',
           color: '{primary.700}',
           focusColor: '{primary.800}'
         },

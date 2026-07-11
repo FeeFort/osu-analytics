@@ -1,21 +1,65 @@
 <script setup>
-import { ref, nextTick } from 'vue'
+import { computed, nextTick, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import Avatar from 'primevue/avatar'
 import Menu from 'primevue/menu'
-import { User, Scale, EllipsisVertical } from 'lucide-vue-next'
+import Dialog from 'primevue/dialog'
+import { Search, Scale, EllipsisVertical, Info, Newspaper, LogIn, Check } from 'lucide-vue-next'
 
-const navItems = [
-  { icon: User, label: 'Profile', path: '/' },
-  { icon: Scale, label: 'Compare', path: '/compare' }
+const route = useRoute()
+const router = useRouter()
+
+// Сгруппированные пункты меню — секции с подписью (Navigation/Analytics)
+const navGroups = [
+  {
+    label: 'Navigation',
+    items: [
+      { icon: Search, label: 'Search', path: '/search' },
+      { icon: Newspaper, label: 'News', path: '/news' }
+    ]
+  },
+  {
+    label: 'Analytics',
+    items: [{ icon: Scale, label: 'Compare', path: '/compare' }]
+  }
 ]
 
-const activeLabel = ref('Profile')
+function isActivePath(path) {
+  return route.path === path
+}
+
+const aboutDialogVisible = ref(false)
+
+// TODO: заменить на реальные данные из auth store / API, когда подключим бэкенд
+const isLoggedIn = ref(true)
+const currentUser = ref({
+  name: 'dr1ma17',
+  avatarUrl: 'https://i.pravatar.cc/80',
+  verified: true
+})
+
+// Попап по клику на три точки — Profile, Settings, тема, Log out
+const isDark = ref(document.documentElement.classList.contains('app-dark'))
+
+function toggleTheme() {
+  document.documentElement.classList.toggle('app-dark')
+  isDark.value = !isDark.value
+}
 
 const profileMenu = ref()
-const profileMenuItems = [
-  { label: 'Settings', icon: 'pi pi-cog', class: 'menu-item-settings' },
+const profileMenuItems = computed(() => [
+  { label: 'Profile', icon: 'pi pi-user', class: 'menu-item-neutral', command: () => router.push('/') },
+  { label: 'Settings', icon: 'pi pi-cog', class: 'menu-item-neutral' },
+  { separator: true },
+  {
+    label: isDark.value ? 'Light theme' : 'Dark theme',
+    icon: isDark.value ? 'pi pi-sun' : 'pi pi-moon',
+    class: 'menu-item-neutral',
+    command: toggleTheme
+  },
+  { separator: true },
   { label: 'Log out', icon: 'pi pi-sign-out', class: 'menu-item-logout' }
-]
+])
 
 async function toggleProfileMenu(event) {
   profileMenu.value.toggle(event)
@@ -33,27 +77,45 @@ async function toggleProfileMenu(event) {
   <div class="app-layout">
     <aside class="sidebar">
       <div class="logo">
-        <span class="logo-title">Logo</span>
+        <div class="logo-mark">
+          <img src="./assets/logo-light.png" alt="Logo" class="logo-img" :class="{ visible: !isDark }" />
+          <img src="./assets/logo-dark.png" alt="Logo" class="logo-img" :class="{ visible: isDark }" />
+        </div>
       </div>
 
       <nav class="menu-items">
-        <router-link
-          v-for="item in navItems"
-          :key="item.label"
-          :to="item.path"
-          class="menu-button"
-          :class="{ active: activeLabel === item.label }"
-          @click="activeLabel = item.label"
-        >
-          <component :is="item.icon" :size="22" />
-          <span>{{ item.label }}</span>
-        </router-link>
+        <div v-for="group in navGroups" :key="group.label" class="menu-group">
+          <span class="menu-group-label">{{ group.label }}</span>
+
+          <router-link
+            v-for="item in group.items"
+            :key="item.label"
+            :to="item.path"
+            class="menu-button"
+            :class="{ active: isActivePath(item.path) }"
+          >
+            <component :is="item.icon" :size="22" />
+            <span>{{ item.label }}</span>
+          </router-link>
+        </div>
       </nav>
 
       <div class="menu-bottom">
-        <div class="profile-lower">
-          <Avatar label="U" shape="circle" />
-          <span class="profile-lower-name">User</span>
+        <button type="button" class="menu-button about-button" @click="aboutDialogVisible = true">
+          <Info :size="22" />
+          <span>About</span>
+        </button>
+
+        <div v-if="isLoggedIn" class="profile-lower">
+          <Avatar
+            :image="currentUser.avatarUrl || undefined"
+            :label="!currentUser.avatarUrl ? currentUser.name.charAt(0).toUpperCase() : undefined"
+            shape="circle"
+          />
+          <span class="profile-lower-name">
+            {{ currentUser.name }}
+            <Check v-if="currentUser.verified" :size="15" :stroke-width="3" class="verified-icon" />
+          </span>
 
           <button type="button" class="profile-lower-more" @click="toggleProfileMenu">
             <EllipsisVertical :size="18" />
@@ -61,18 +123,38 @@ async function toggleProfileMenu(event) {
 
           <Menu ref="profileMenu" :model="profileMenuItems" :popup="true" />
         </div>
+
+        <router-link v-else to="/login" class="menu-button login-button">
+          <LogIn :size="22" />
+          <span>Log in</span>
+        </router-link>
       </div>
     </aside>
 
     <main class="content">
       <router-view />
     </main>
+
+    <Dialog
+      v-model:visible="aboutDialogVisible"
+      header="About"
+      modal
+      dismissableMask
+      :style="{ width: '420px' }"
+    >
+      <p>Hello world</p>
+    </Dialog>
   </div>
 </template>
 
 <style scoped>
 .app-layout {
   min-height: 100vh;
+}
+
+.app-layout,
+.app-layout * {
+  transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
 }
 
 .sidebar {
@@ -98,6 +180,7 @@ async function toggleProfileMenu(event) {
   min-height: 72px;
   display: flex;
   align-items: center;
+  justify-content: center;
   border-bottom: 1px solid var(--p-content-border-color);
 }
 
@@ -107,11 +190,47 @@ async function toggleProfileMenu(event) {
   color: var(--p-text-color);
 }
 
+.logo-mark {
+  position: relative;
+  width: 85%;
+  aspect-ratio: 1024 / 178;
+}
+
+.logo-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: left center;
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.logo-img.visible {
+  opacity: 1;
+}
+
 .menu-items {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16px;
   padding: 12px;
+}
+
+.menu-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.menu-group-label {
+  padding: 8px 12px 4px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--p-text-muted-color);
 }
 
 .menu-button {
@@ -146,7 +265,22 @@ async function toggleProfileMenu(event) {
 .menu-bottom {
   margin-top: auto;
   padding: 10px;
+}
+
+.login-button {
+  margin-top: 6px;
   border-top: 1px solid var(--p-content-border-color);
+  padding-top: 16px;
+}
+
+.about-button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  width: 100%;
+  font: inherit;
+  cursor: pointer;
+  margin-bottom: 4px;
 }
 
 .profile-lower {
@@ -154,6 +288,8 @@ async function toggleProfileMenu(event) {
   align-items: center;
   gap: 12px;
   padding: 10px;
+  margin-top: 6px;
+  border-top: 1px solid var(--p-content-border-color);
 }
 
 .profile-lower :deep(.p-avatar) {
@@ -163,9 +299,19 @@ async function toggleProfileMenu(event) {
 }
 
 .profile-lower-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-size: 15px;
   font-weight: 600;
   color: var(--p-text-color);
+}
+
+.verified-icon {
+  color: var(--p-primary-color);
+  flex: 0 0 auto;
+  position: relative;
+  top: 1px;
 }
 
 .profile-lower-more {
@@ -199,8 +345,14 @@ async function toggleProfileMenu(event) {
 <style>
 /* Не-scoped специально: Menu из PrimeVue телепортируется в <body>,
    а значит scoped/:deep() стили из App.vue его не достают. */
-.menu-item-settings .p-menu-item-icon {
-  color: #ffffff !important;
+body,
+.p-menu,
+.p-menu * {
+  transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
+}
+
+.menu-item-neutral .p-menu-item-icon {
+  color: var(--p-text-color) !important;
 }
 
 .menu-item-logout .p-menu-item-icon,
