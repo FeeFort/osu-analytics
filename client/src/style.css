@@ -18,6 +18,8 @@
 }
 
 :root {
+    --theme-transition-duration: 180ms;
+    --theme-transition-timing-function: ease;
   --app-font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --app-background: var(--p-content-background, #ffffff);
   --app-text-color: var(--p-text-color, #131317);
@@ -33,544 +35,181 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-* {
-  box-sizing: border-box;
-}
-
+*,
 *::before,
-*::after {
-  box-sizing: inherit;
+*::after { box-sizing: border-box; }
+
+/* Theme transitions are limited to painted surfaces; SVG, canvas, and images
+   are excluded so their paint is never interpolated during a palette change. */
+/* Keep transitions within the app UI; visual assets stay instantaneous. */
+#app :where(*):not(svg):not(svg *):not(canvas):not(img),
+.app-user-menu,
+.app-user-menu :where(*):not(svg):not(svg *) {
+    transition-property: background-color, border-color, box-shadow !important;
+    transition-duration: var(--theme-transition-duration);
+    transition-timing-function: var(--theme-transition-timing-function);
 }
 
-/* Keep theme changes in sync across PrimeVue surfaces and the custom shell. */
-html,
-body,
-#app,
-#app * {
-  transition-property: background-color, color, border-color, box-shadow, fill, stroke;
-  transition-duration: 180ms;
-  transition-timing-function: ease;
-}
-
-/* Do not let the global theme transition interfere with sidebar collapsing. */
-.app-sidebar,
-.app-sidebar * {
-  transition-duration: 250ms;
-  transition-timing-function: cubic-bezier(.4, 0, .2, 1);
-}
 
 html,
 body,
 #app {
-  width: 100%;
-  max-width: none;
-  min-width: 0;
-  min-height: 100%;
-  min-height: 100vh;
-  min-height: 100dvh;
+  width: 100%; max-width: none; min-width: 0;
+  min-height: 100%; min-height: 100vh; min-height: 100dvh;
   margin: 0;
 }
 
-html {
-  min-height: 100%;
-  background: var(--app-background);
-}
-
+html { min-height: 100%; background: var(--app-background); }
 body {
   display: block;
-  min-height: 100svh;
-  min-height: 100vh;
-  min-height: 100dvh;
+  min-height: 100svh; min-height: 100vh; min-height: 100dvh;
   background: var(--app-background);
   color: var(--app-text-color);
   overflow-x: hidden;
 }
-
-button,
-input,
-textarea,
-select {
-  font: inherit;
-}
-
-#app {
-  min-height: 100vh;
-  min-height: 100dvh;
-  padding: 0;
-}
-
+button, input, textarea, select { font: inherit; }
+#app { min-height: 100vh; min-height: 100dvh; padding: 0; }
 #app > * {
-  display: flex;
-  width: 100%;
-  max-width: none;
-  min-width: 0;
-  min-height: 100vh;
-  min-height: 100dvh;
-  flex: 1 1 auto;
+  display: flex; width: 100%; max-width: none; min-width: 0;
+  min-height: 100vh; min-height: 100dvh; flex: 1 1 auto;
 }
+#app > * > * { width: 100%; max-width: none; min-width: 0; }
+.app-shell-layout { min-height: 100vh; min-height: 100dvh; }
+.app-shell-layout > .p-sidebar-main { min-width: 0; margin-left: 0; }
+.app-shell-layout .app-page-content { min-height: 100vh; min-height: 100dvh; }
 
-/* Keep the application shell fluid on wide screens and avoid Vite's starter
-   max-width/centering rules if they are reintroduced by a component. */
-#app > * > * {
-  width: 100%;
-  max-width: none;
-  min-width: 0;
-}
-
-.app-shell-layout {
-  min-height: 100vh;
-  min-height: 100dvh;
-}
-
-.app-shell-layout > .p-sidebar-main {
-  min-width: 0;
-  margin-left: 0;
-}
-
-.app-shell-layout .app-page-content {
-  min-height: 100vh;
-  min-height: 100dvh;
-}
-
-/* Sidebar sizing */
+/* Sidebar layout, collapse animation, and theme-aware item colours. */
 .app-sidebar {
-  /* Keep the old sidebar proportions while using PrimeVue's native variables. */
   --sidebar-width: 20rem;
   --sidebar-width-icon: 5.5rem;
+  --sidebar-item-color: #52525b;
+  --sidebar-item-active-color: #18181b;
+  --sidebar-item-muted-color: #71717a;
   position: relative;
   flex: 0 0 auto;
 }
-
-.app-sidebar .p-sidebar-aside {
-  position: relative;
-  flex: 0 0 auto;
+.app-dark .app-sidebar {
+  --sidebar-item-color: #a1a1aa;
+  --sidebar-item-active-color: #ffffff;
+  --sidebar-item-muted-color: #a1a1aa;
 }
-
 .app-sidebar .p-sidebar-aside {
-  position: fixed;
-  inset: 0 auto 0 0;
-  height: 100vh;
-  height: 100dvh;
+  position: fixed; inset: 0 auto 0 0;
+  height: 100vh; height: 100dvh; flex: 0 0 auto;
 }
-
 .app-sidebar,
 .app-sidebar .p-sidebar-aside,
 .app-sidebar .p-sidebar-spacer {
   transition: width 250ms cubic-bezier(.4, 0, .2, 1), padding 250ms cubic-bezier(.4, 0, .2, 1), background-color 180ms ease, border-color 180ms ease;
 }
-
-.app-sidebar .p-sidebar-panel,
-.app-sidebar .p-sidebar-header,
-.app-sidebar .p-sidebar-content,
-.app-sidebar .p-sidebar-footer,
-.app-sidebar .p-sidebar-group,
-.app-sidebar .p-sidebar-menu-button,
-.app-sidebar .p-sidebar-menu-button > span,
-.app-sidebar .p-sidebar-menu-button > svg,
-.app-sidebar .p-sidebar-group-label {
-  transition-property: background-color, color, border-color, box-shadow, fill, stroke, opacity, max-width, margin, padding, gap;
-  transition-duration: 180ms;
-  transition-timing-function: ease;
-}
-
 .app-sidebar-logo-frame {
-  display: block;
-  width: 85%;
-  max-width: 100%;
-  margin-inline: auto;
-  overflow: hidden;
-  aspect-ratio: 966 / 145;
-  flex: 0 0 auto;
+  display: block; width: 85%; max-width: 100%; margin-inline: auto;
+  overflow: hidden; aspect-ratio: 966 / 145; flex: 0 0 auto;
   transition: width 250ms cubic-bezier(.4, 0, .2, 1);
 }
-
 .app-sidebar-logo {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: left center;
-  transition: opacity 160ms ease;
+  display: block; width: 100%; height: 100%; object-fit: contain;
+  object-position: left center; transition: opacity 160ms ease;
 }
-
 .app-sidebar-menu-button {
-  min-height: 3rem !important;
-  height: 3rem !important;
-  gap: 0.875rem !important;
-  padding: 0.75rem 1rem !important;
-  font-size: 1.05rem !important;
-  line-height: 1.25 !important;
-  transition: width 250ms cubic-bezier(.4, 0, .2, 1), height 250ms cubic-bezier(.4, 0, .2, 1), padding 250ms cubic-bezier(.4, 0, .2, 1), background-color 250ms cubic-bezier(.4, 0, .2, 1), color 250ms cubic-bezier(.4, 0, .2, 1);
+  min-height: 3rem !important; height: 3rem !important;
+  gap: 0.875rem !important; padding: 0.75rem 1rem !important;
+  color: var(--sidebar-item-color) !important;
+  font-size: 1.05rem !important; line-height: 1.25 !important;
+  transition: width 250ms cubic-bezier(.4, 0, .2, 1), height 250ms cubic-bezier(.4, 0, .2, 1), padding 250ms cubic-bezier(.4, 0, .2, 1), gap 250ms cubic-bezier(.4, 0, .2, 1), background-color 180ms ease, color 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
 }
-
+.app-sidebar-menu-button > span { color: inherit !important; }
+.app-sidebar-menu-button:is(:hover, [data-active="true"]) {
+  color: var(--sidebar-item-active-color) !important;
+}
+/* Icons inherit currentColor but have no independent paint transition. */
 .app-sidebar-menu-icon,
 .app-sidebar-menu-button > svg {
-  width: 1.35rem !important;
-  height: 1.35rem !important;
-  flex-shrink: 0;
-  color: inherit !important;
-  stroke: currentColor !important;
-  fill: none;
-  transition: color 250ms cubic-bezier(.4, 0, .2, 1), stroke 250ms cubic-bezier(.4, 0, .2, 1);
+  width: 1.35rem !important; height: 1.35rem !important; flex-shrink: 0;
+  color: inherit !important; stroke: currentColor !important; fill: none;
+  transition: none !important;
 }
-
-.app-sidebar-menu-button > span {
-  transition: color 250ms cubic-bezier(.4, 0, .2, 1), opacity 250ms cubic-bezier(.4, 0, .2, 1), max-width 250ms cubic-bezier(.4, 0, .2, 1), margin 250ms cubic-bezier(.4, 0, .2, 1);
-}
-
-.app-sidebar-menu-button {
-  color: #52525b !important;
-}
-
-.app-sidebar-menu-button[data-active="true"] {
-  color: #ffffff !important;
-}
-
-.app-sidebar-menu-button[data-active="true"] > svg {
-  color: inherit !important;
-}
-
-.app-sidebar-menu-button:hover,
-.app-sidebar-menu-button:hover > svg {
-  color: #ffffff !important;
-}
-
-.app-sidebar-menu-button:not([data-active="true"]) > span,
-.app-sidebar-menu-button:not([data-active="true"]) > svg {
-  color: inherit !important;
-}
-
-/* PrimeVue's generated menu rules are more specific than the base button
-   color, so keep the state colors on the actual sidebar component as well. */
-.p-sidebar .app-sidebar-menu-button:not([data-active="true"]),
-.p-sidebar .app-sidebar-menu-button:not([data-active="true"]) > span,
-.p-sidebar .app-sidebar-menu-button:not([data-active="true"]) > svg {
-  color: #52525b !important;
-}
-
-.p-sidebar .app-sidebar-menu-button[data-active="true"],
-.p-sidebar .app-sidebar-menu-button[data-active="true"] > span,
-.p-sidebar .app-sidebar-menu-button[data-active="true"] > svg,
-.p-sidebar .app-sidebar-menu-button:hover,
-.p-sidebar .app-sidebar-menu-button:hover > span,
-.p-sidebar .app-sidebar-menu-button:hover > svg {
-  color: #ffffff !important;
-}
-
-.app-dark .app-sidebar-menu-button {
-  color: #a1a1aa !important;
-}
-
-.app-dark .app-sidebar-menu-button[data-active="true"],
-.app-dark .app-sidebar-menu-button:hover {
-  color: #ffffff !important;
-}
-
-.app-dark .p-sidebar .app-sidebar-menu-button:not([data-active="true"]),
-.app-dark .p-sidebar .app-sidebar-menu-button:not([data-active="true"]) > span,
-.app-dark .p-sidebar .app-sidebar-menu-button:not([data-active="true"]) > svg {
-  color: #a1a1aa !important;
-}
-
-/* Keep the sidebar hover state white in both themes. */
-.p-sidebar .app-sidebar-menu-button:hover,
-.p-sidebar .app-sidebar-menu-button:hover > span,
-.p-sidebar .app-sidebar-menu-button:hover > svg,
-.app-dark .p-sidebar .app-sidebar-menu-button:hover,
-.app-dark .p-sidebar .app-sidebar-menu-button:hover > span,
-.app-dark .p-sidebar .app-sidebar-menu-button:hover > svg {
-  color: #ffffff !important;
-}
-
 .app-sidebar-profile-chevron {
-  margin-left: auto !important;
-  margin-right: -0.5rem;
-  color: var(--p-text-muted-color) !important;
-  stroke: currentColor !important;
-  fill: none;
+  margin-left: auto !important; margin-right: -0.5rem;
+  color: var(--sidebar-item-muted-color) !important;
+  stroke: currentColor !important; fill: none;
+  transition: max-width 200ms ease, opacity 150ms ease, transform 200ms ease, margin 250ms ease !important;
 }
-
-/* PrimeVue keeps the regular button padding in icon mode. With a narrow
-   icon-only button that padding leaves no content box, so the SVG is clipped. */
 .app-sidebar[data-collapsible="icon"] .app-sidebar-menu-button {
-  width: 100% !important;
-  min-width: 0;
-  padding: 0 !important;
-  gap: 0 !important;
-  justify-content: center !important;
+  width: 100% !important; min-width: 0; padding: 0 !important;
+  gap: 0 !important; justify-content: center !important;
 }
-
 .app-sidebar[data-collapsible="icon"] .app-sidebar-menu-button > span,
 .app-sidebar[data-collapsible="icon"] .app-sidebar-header-button > svg {
-  max-width: 0;
-  margin: 0;
-  overflow: hidden;
-  opacity: 0;
+  max-width: 0; margin: 0; overflow: hidden; opacity: 0;
   transform: translateX(-0.5rem);
   transition: max-width 200ms ease, opacity 150ms ease, transform 200ms ease, margin 250ms ease;
 }
-
-.app-sidebar[data-collapsible="icon"] .app-sidebar-logo-frame {
-  width: 2.25rem;
-  aspect-ratio: 1;
-  max-width: none;
-}
-
-.app-sidebar[data-collapsible="icon"] .app-sidebar-logo {
-  object-fit: cover;
-  object-position: center center;
-}
-
-.app-sidebar-header-button {
-  min-height: 3.25rem !important;
-  height: 3.25rem !important;
-}
-
-.app-sidebar-header-button > span {
-  font-size: 1.05rem;
-}
-
-.app-sidebar-group-label {
-  padding-block: 0.75rem !important;
-  font-size: 0.85rem !important;
-  letter-spacing: 0.04em;
-}
-
-.app-sidebar-avatar {
-  width: 2.25rem !important;
-  height: 2.25rem !important;
-  font-size: 0.85rem !important;
-}
-
-.app-sidebar-profile-item {
-  position: relative;
-  margin-top: 0.5rem;
-  padding-top: 0.5rem;
-}
-
+.app-sidebar[data-collapsible="icon"] .app-sidebar-logo-frame { width: 2.25rem; aspect-ratio: 1; max-width: none; }
+.app-sidebar[data-collapsible="icon"] .app-sidebar-logo { object-fit: cover; object-position: center center; }
+.app-sidebar-header-button { min-height: 3.25rem !important; height: 3.25rem !important; }
+.app-sidebar-header-button > span { font-size: 1.05rem; }
+.app-sidebar-group-label { padding-block: 0.75rem !important; font-size: 0.85rem !important; letter-spacing: 0.04em; }
+.app-sidebar-avatar { width: 2.25rem !important; height: 2.25rem !important; font-size: 0.85rem !important; }
+.app-sidebar-profile-item { position: relative; margin-top: 0.5rem; padding-top: 0.5rem; }
 .app-sidebar-profile-item::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: 0;
-  height: 1px;
-  background: var(--p-content-border-color);
-  transition: background-color 180ms ease;
+  content: ''; position: absolute; inset: 0 0 auto; height: 1px;
+  background: var(--p-content-border-color); transition: background-color 180ms ease;
 }
-
 .app-page-content {
-  display: flex;
-  min-width: 0;
-  min-height: 100%;
-  flex: 1;
-  flex-direction: column;
-  padding: 1rem;
-  overflow: auto;
+  display: flex; min-width: 0; min-height: 100%; flex: 1;
+  flex-direction: column; padding: 1rem; overflow: auto;
 }
 
-/* Keep the delay before a theme switch imperceptible: the popup fades out in
-   80ms and the new palette is applied by its Vue after-leave hook. */
-.app-user-menu-leave-active {
-  transition: opacity 80ms ease, transform 80ms ease !important;
-}
+/* The popup disappears before the palette is changed. */
+.app-user-menu-leave-active { transition: opacity 80ms ease, transform 80ms ease !important; }
+.app-user-menu-leave-from { opacity: 1; transform: translateY(0); }
+.app-user-menu-leave-to { opacity: 0; transform: translateY(-2px); }
 
-.app-user-menu-leave-from {
-  opacity: 1;
-  transform: translateY(0);
+/* User popup menu. */
+.app-user-menu {
+  --user-menu-item-color: #52525b;
+  --user-menu-item-hover-color: #18181b;
 }
-
-.app-user-menu-leave-to {
-  opacity: 0;
-  transform: translateY(-2px);
+.app-dark .app-user-menu {
+  --user-menu-item-color: #a1a1aa;
+  --user-menu-item-hover-color: #ffffff;
 }
-
-/* The popup uses the same rhythm as the primary sidebar actions. */
 .app-user-menu .p-menu-item-content,
+.app-user-menu .p-menu-item-link { min-height: 3rem; }
 .app-user-menu .p-menu-item-link {
-  min-height: 3rem;
+  gap: 0.875rem; padding-block: 0.75rem;
+  color: var(--user-menu-item-color) !important;
+  font-size: 1.05rem; line-height: 1.25;
+  transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
 }
-
-.app-user-menu .p-menu-item-link {
-  gap: 0.875rem;
-  padding-block: 0.75rem;
-  font-size: 1.05rem;
-  line-height: 1.25;
-}
-
-.app-user-menu .p-menu-item-label {
-  font-size: 1.05rem;
-  line-height: 1.25;
-}
-
-.app-user-menu .p-menu-item-icon {
-  width: 1.35rem;
-  height: 1.35rem;
-  font-size: 1.35rem;
-  flex-shrink: 0;
-  color: inherit;
-  stroke: currentColor;
-  fill: none;
-  transition: color 200ms ease, stroke 200ms ease;
-}
-
+.app-user-menu .p-menu-item-label,
+.app-user-menu .p-menu-item-icon,
+.app-user-menu .p-menu-item-icon svg { color: inherit !important; }
+.app-user-menu .p-menu-item-label { font-size: 1.05rem; line-height: 1.25; }
+.app-user-menu .p-menu-item-icon,
 .app-user-menu .p-menu-item-icon svg {
-  width: 1.35rem;
-  height: 1.35rem;
+  width: 1.35rem; height: 1.35rem; flex-shrink: 0;
+  stroke: currentColor !important; fill: none !important; transition: none !important;
 }
-
-.app-user-menu .p-menu-item-link,
-.app-user-menu .p-menu-item-label {
-  color: #52525b !important;
-  transition: color 200ms ease, background-color 200ms ease;
-}
-
-.app-user-menu .p-menu-item-link:hover,
-.app-user-menu .p-menu-item-link:hover .p-menu-item-label,
-.app-user-menu .p-menu-item-link:hover .p-menu-item-icon {
-  color: #ffffff !important;
-}
-
-.app-dark .app-user-menu .p-menu-item-link,
-.app-dark .app-user-menu .p-menu-item-label,
-.app-dark .app-user-menu .p-menu-item-link .p-menu-item-icon {
-  color: #a1a1aa !important;
-}
-
-.app-dark .app-user-menu .p-menu-item-link:hover,
-.app-dark .app-user-menu .p-menu-item-link:hover .p-menu-item-label,
-.app-dark .app-user-menu .p-menu-item-link:hover .p-menu-item-icon {
-  color: #ffffff !important;
-}
-
-.app-user-menu .p-menu-item-link .p-menu-item-icon,
-.app-user-menu .p-menu-item-link .p-menu-item-icon svg,
-.app-user-menu .p-menu-item-link > svg {
-  color: var(--p-text-color) !important;
-  stroke: currentColor !important;
-  fill: none !important;
-}
-
-.app-user-menu .app-user-menu-logout,
-.app-user-menu .app-user-menu-logout .p-menu-item-icon,
-.app-user-menu .app-user-menu-logout .p-menu-item-label {
-  color: #ef4444;
-}
-
-.app-user-menu .app-user-menu-logout:hover,
-.app-user-menu .app-user-menu-logout:hover .p-menu-item-icon,
-.app-user-menu .app-user-menu-logout:hover .p-menu-item-label {
-  color: #dc2626;
-}
-
-/* Lucide components inherit this color, so logout stays red in both themes. */
-.app-user-menu .app-user-menu-logout,
-.app-user-menu .app-user-menu-logout .p-menu-item-label,
-.app-user-menu .app-user-menu-logout .p-menu-item-icon,
-.app-user-menu .app-user-menu-logout .p-menu-item-icon svg,
-.app-user-menu .app-user-menu-logout svg {
-  color: #ef4444 !important;
-  stroke: currentColor !important;
-}
-
-.app-user-menu .app-user-menu-logout:hover,
-.app-user-menu .app-user-menu-logout:hover .p-menu-item-label,
-.app-user-menu .app-user-menu-logout:hover .p-menu-item-icon,
-.app-user-menu .app-user-menu-logout:hover .p-menu-item-icon svg,
-.app-user-menu .app-user-menu-logout:hover svg {
-  color: #dc2626 !important;
-}
-
-.app-dark .app-sidebar-menu-button[data-active="true"],
-.app-dark .app-sidebar-menu-button:hover,
-.app-dark .app-sidebar-menu-button[data-active="true"] > svg,
-.app-dark .app-sidebar-menu-button:hover > svg {
-  color: #ffffff !important;
-}
-
-/* Logout is intentionally excluded from the neutral/white menu states. */
+.app-user-menu .p-menu-item-link:hover { color: var(--user-menu-item-hover-color) !important; }
+/* Logout intentionally stays red in every state and theme. */
 .app-user-menu .p-menu-item.app-user-menu-logout,
-.app-user-menu .p-menu-item.app-user-menu-logout > .p-menu-item-content,
 .app-user-menu .p-menu-item.app-user-menu-logout .p-menu-item-link,
 .app-user-menu .p-menu-item.app-user-menu-logout .p-menu-item-label,
 .app-user-menu .p-menu-item.app-user-menu-logout .p-menu-item-icon,
-.app-user-menu .p-menu-item.app-user-menu-logout .p-menu-item-icon svg,
+.app-user-menu .p-menu-item.app-user-menu-logout .p-menu-item-icon svg {
+  color: #ef4444 !important; stroke: currentColor !important;
+}
 .app-user-menu .p-menu-item.app-user-menu-logout:hover,
 .app-user-menu .p-menu-item.app-user-menu-logout:hover .p-menu-item-link,
 .app-user-menu .p-menu-item.app-user-menu-logout:hover .p-menu-item-label,
 .app-user-menu .p-menu-item.app-user-menu-logout:hover .p-menu-item-icon,
-.app-user-menu .p-menu-item.app-user-menu-logout:hover .p-menu-item-icon svg,
-.app-user-menu .p-menu-item.app-user-menu-logout:focus-visible .p-menu-item-link,
-.app-user-menu .p-menu-item.app-user-menu-logout:active .p-menu-item-link {
-  color: #ef4444 !important;
-  stroke: currentColor !important;
-}
-
-/* Theme-aware hover: dark text on the light surface, white text on dark. */
-.p-sidebar .app-sidebar-menu-button:hover,
-.p-sidebar .app-sidebar-menu-button:hover > span,
-.p-sidebar .app-sidebar-menu-button:hover > svg {
-  color: #18181b !important;
-}
-
-.app-dark .p-sidebar .app-sidebar-menu-button:hover,
-.app-dark .p-sidebar .app-sidebar-menu-button:hover > span,
-.app-dark .p-sidebar .app-sidebar-menu-button:hover > svg {
-  color: #ffffff !important;
-}
-
-.app-user-menu .p-menu-item-link:hover,
-.app-user-menu .p-menu-item-link:hover .p-menu-item-label,
-.app-user-menu .p-menu-item-link:hover .p-menu-item-icon {
-  color: #18181b !important;
-}
-
-.app-dark .app-user-menu .p-menu-item-link:hover,
-.app-dark .app-user-menu .p-menu-item-link:hover .p-menu-item-label,
-.app-dark .app-user-menu .p-menu-item-link:hover .p-menu-item-icon {
-  color: #ffffff !important;
-}
-
-/* Logout remains red and is not affected by the generic menu hover colors. */
-.app-user-menu .p-menu-item.app-user-menu-logout:hover,
-.app-user-menu .p-menu-item.app-user-menu-logout:hover .p-menu-item-link,
-.app-user-menu .p-menu-item.app-user-menu-logout:hover .p-menu-item-label,
-.app-user-menu .p-menu-item.app-user-menu-logout:hover .p-menu-item-icon,
-.app-user-menu .p-menu-item.app-user-menu-logout:hover .p-menu-item-icon svg {
-  color: #ef4444 !important;
-  stroke: currentColor !important;
-}
-
-/* Theme transition for the actual PrimeVue state layer. This keeps the active
-   item from lagging behind the rest of the layout. */
-.p-sidebar .app-sidebar-menu-button,
-.p-sidebar .app-sidebar-menu-button::before,
-.p-sidebar .app-sidebar-menu-button > span,
-.p-sidebar .app-sidebar-menu-button > svg,
-.app-user-menu .p-menu-item-link,
-.app-user-menu .p-menu-item-label,
-.app-user-menu .p-menu-item-icon {
-  transition-duration: 180ms !important;
-  transition-timing-function: ease !important;
-}
-
-.app-sidebar .p-sidebar-panel,
-.app-sidebar .p-sidebar-aside,
-.app-sidebar .p-sidebar-group-label,
-.app-sidebar .p-sidebar-menu-button,
-.app-sidebar .p-sidebar-menu-button[data-active="true"] {
-  transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, width 250ms cubic-bezier(.4, 0, .2, 1), padding 250ms cubic-bezier(.4, 0, .2, 1), gap 250ms cubic-bezier(.4, 0, .2, 1) !important;
-}
-
-/* Active item follows the current theme, just like hover. */
-.p-sidebar .app-sidebar-menu-button[data-active="true"],
-.p-sidebar .app-sidebar-menu-button[data-active="true"] > span,
-.p-sidebar .app-sidebar-menu-button[data-active="true"] > svg {
-  color: #18181b !important;
-}
-
-.app-dark .p-sidebar .app-sidebar-menu-button[data-active="true"],
-.app-dark .p-sidebar .app-sidebar-menu-button[data-active="true"] > span,
-.app-dark .p-sidebar .app-sidebar-menu-button[data-active="true"] > svg {
-  color: #ffffff !important;
+.app-user-menu .p-menu-item.app-user-menu-logout:hover .p-menu-item-icon svg { color: #dc2626 !important; }
+/* Theme text colors switch discretely. Interpolating glyph colors causes
+   antialiasing shimmer during the theme change. */
+#app :where(*):not(svg):not(svg *):not(canvas):not(img),
+.app-user-menu,
+.app-user-menu :where(*):not(svg):not(svg *) {
+    transition-property: background-color, border-color, box-shadow !important;
 }

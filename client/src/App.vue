@@ -24,13 +24,14 @@ import Menu from 'primevue/menu';
 import Avatar from 'primevue/avatar';
 import AvatarGroup from 'primevue/avatargroup';
 import { computed, ref } from 'vue';
+import { useTheme } from './composables/toggleTheme';
 import { ChevronDown, Settings, Info, LogOut, Moon, Newspaper, Scale, Search, Sun, UserRound } from '@lucide/vue';
 import { useRouter, useRoute } from 'vue-router';
 import logoLight from './assets/logo-light.png';
 import logoDark from './assets/logo-dark.png';
 
 const activeCompany = ref({ name: 'Acme Inc', logo: 'A', color: 'from-violet-500 to-indigo-600' });
-const isDark = ref(document.documentElement.classList.contains('app-dark'));
+const { isDark, toggleTheme: applyThemeToggle } = useTheme();
 const themeChangePending = ref(false);
 const userMenuTransition = {
     leaveActiveClass: 'app-user-menu-leave-active',
@@ -60,8 +61,7 @@ function applyPendingThemeChange() {
     if (!themeChangePending.value) return;
 
     themeChangePending.value = false;
-    isDark.value = !isDark.value;
-    document.documentElement.classList.toggle('app-dark', isDark.value);
+    applyThemeToggle();
 }
 const companyMenuItems = computed(() => [
     ...companies.map((c) => ({
@@ -169,4 +169,3 @@ const companyMenuItems = computed(() => [
         </SidebarLayout>
     </div>
 </template>
-
