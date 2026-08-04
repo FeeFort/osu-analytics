@@ -1,17 +1,15 @@
-// src/theme.js
 import { definePreset } from '@primeuix/themes'
 import Aura from '@primeuix/themes/aura'
 
 export default definePreset(Aura, {
   semantic: {
-    // ===== Акцентные цвета (не трогаем, как договорились) =====
     primary: {
       50: '#fdf2f8',
       100: '#fce7f3',
       200: '#fbcfe8',
       300: '#f9a8d4',
       400: '#f472b6',
-      500: '#ec4899', // розово-малиновый акцент (Compare, New comparison, Team A)
+      500: '#ec4899',
       600: '#db2777',
       700: '#be185d',
       800: '#9d174d',
@@ -23,14 +21,12 @@ export default definePreset(Aura, {
       200: '#bfdbfe',
       300: '#93c5fd',
       400: '#60a5fa',
-      500: '#3b82f6', // синий акцент (Team B)
+      500: '#3b82f6',
       600: '#2563eb',
       700: '#1d4ed8',
       800: '#1e40af',
       900: '#1e3a8a'
     },
-
-    // ===== Запасные семантические цвета (нейтральные, стандартные) =====
     secondary: {
       50: '#f8fafc',
       100: '#f1f5f9',
@@ -79,10 +75,7 @@ export default definePreset(Aura, {
       800: '#991b1b',
       900: '#7f1d1d'
     },
-
-    // ===== Цветовые схемы =====
     colorScheme: {
-      // -------- СВЕТЛАЯ ТЕМА --------
       light: {
         surface: {
           0: '#ffffff',
@@ -91,11 +84,11 @@ export default definePreset(Aura, {
           200: '#e3e3e9',
           300: '#c8c8d2',
           400: '#a3a3b2',
-          500: '#7d7d8f', // границы карточек
+          500: '#7d7d8f',
           600: '#5c5c6e',
-          700: '#3f3f4d', // второстепенный текст на светлом
+          700: '#3f3f4d',
           800: '#26262f',
-          900: '#131317', // почти-чёрный текст заголовков
+          900: '#131317',
           950: '#08080a'
         },
         content: {
@@ -132,8 +125,6 @@ export default definePreset(Aura, {
           placeholderColor: '{surface.500}'
         }
       },
-
-      // -------- ТЁМНАЯ ТЕМА --------
       dark: {
         surface: {
           0: '#ffffff',
@@ -142,11 +133,11 @@ export default definePreset(Aura, {
           200: '#9499a8',
           300: '#6b6f7d',
           400: '#3a3a44',
-          500: '#26262e', // границы карточек
+          500: '#26262e',
           600: '#1c1c23',
-          700: '#16161c', // фон панелей/карточек
+          700: '#16161c',
           800: '#0f0f14',
-          900: '#0a0a0f', // фон страницы
+          900: '#0a0a0f',
           950: '#050507'
         },
         content: {

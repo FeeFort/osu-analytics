@@ -17,6 +17,11 @@ const routes = [
     meta: { title: 'Comparison Result' }
   },
   {
+    path: '/news',
+    component: () => import('../views/NotFound.vue'),
+    meta: { title: 'News' }
+  },
+  {
     path: '/:pathMatch(.*)*',
     component: () => import('../views/NotFound.vue'),
     meta: { title: 'Page Not Found' }
@@ -31,9 +36,11 @@ const router = createRouter({
   }
 })
 
-// Прокидываем title страницы в <title> документа
+// ÐŸÑ€Ð¾ÐºÐ¸Ð´Ñ‹Ð²Ð°ÐµÐ¼ title ÑÑ‚Ñ€Ð°Ð½Ð¸Ñ†Ñ‹ Ð² <title> Ð´Ð¾ÐºÑƒÐ¼ÐµÐ½Ñ‚Ð°
 router.beforeEach((to) => {
-  document.title = to.meta.title ? `${to.meta.title} — MySite` : 'MySite'
+      document.title = to.meta.title ? `${to.meta.title} — MySite` : 'MySite'
 })
 
 export default router
+
+
