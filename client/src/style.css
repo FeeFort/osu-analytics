@@ -139,7 +139,7 @@ select {
 .app-sidebar,
 .app-sidebar .p-sidebar-aside,
 .app-sidebar .p-sidebar-spacer {
-  transition: width 250ms cubic-bezier(.4, 0, .2, 1), padding 250ms cubic-bezier(.4, 0, .2, 1), background-color 180ms ease, border-color 180ms ease;
+  transition: width 250ms cubic-bezier(.4, 0, .2, 1), padding 250ms cubic-bezier(.4, 0, .2, 1);
 }
 
 .app-sidebar .p-sidebar-panel,
@@ -151,9 +151,7 @@ select {
 .app-sidebar .p-sidebar-menu-button > span,
 .app-sidebar .p-sidebar-menu-button > svg,
 .app-sidebar .p-sidebar-group-label {
-  transition-property: background-color, color, border-color, box-shadow, fill, stroke, opacity, max-width, margin, padding, gap;
-  transition-duration: 180ms;
-  transition-timing-function: ease;
+  transition: none;
 }
 
 .app-sidebar-logo-frame {
@@ -183,7 +181,7 @@ select {
   padding: 0.75rem 1rem !important;
   font-size: 1.05rem !important;
   line-height: 1.25 !important;
-  transition: width 250ms cubic-bezier(.4, 0, .2, 1), height 250ms cubic-bezier(.4, 0, .2, 1), padding 250ms cubic-bezier(.4, 0, .2, 1), background-color 250ms cubic-bezier(.4, 0, .2, 1), color 250ms cubic-bezier(.4, 0, .2, 1);
+  transition: width 250ms cubic-bezier(.4, 0, .2, 1), height 250ms cubic-bezier(.4, 0, .2, 1), padding 250ms cubic-bezier(.4, 0, .2, 1);
 }
 
 .app-sidebar-menu-icon,
@@ -194,11 +192,11 @@ select {
   color: inherit !important;
   stroke: currentColor !important;
   fill: none;
-  transition: color 250ms cubic-bezier(.4, 0, .2, 1), stroke 250ms cubic-bezier(.4, 0, .2, 1);
+  transition: none;
 }
 
 .app-sidebar-menu-button > span {
-  transition: color 250ms cubic-bezier(.4, 0, .2, 1), opacity 250ms cubic-bezier(.4, 0, .2, 1), max-width 250ms cubic-bezier(.4, 0, .2, 1), margin 250ms cubic-bezier(.4, 0, .2, 1);
+  transition: opacity 250ms cubic-bezier(.4, 0, .2, 1), max-width 250ms cubic-bezier(.4, 0, .2, 1), margin 250ms cubic-bezier(.4, 0, .2, 1);
 }
 
 .app-sidebar-menu-button {
