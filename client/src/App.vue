@@ -33,14 +33,7 @@ import logoDark from './assets/logo-dark.png';
 import { getErrorState, isPageErrorCode } from './error-config';
 
 const activeCompany = ref({ name: 'Acme Inc', logo: 'A', color: 'from-violet-500 to-indigo-600' });
-const { isDark, toggleTheme: applyThemeToggle } = useTheme();
-const themeChangePending = ref(false);
-const userMenuTransition = {
-    leaveActiveClass: 'app-user-menu-leave-active',
-    leaveFromClass: 'app-user-menu-leave-from',
-    leaveToClass: 'app-user-menu-leave-to',
-    onAfterLeave: applyPendingThemeChange
-};
+const isDark = ref(document.documentElement.classList.contains('app-dark'));
 const router = useRouter();
 const route = useRoute();
 const isErrorRoute = computed(() => route.meta.isErrorPage === true);
@@ -58,16 +51,8 @@ const userMenuItems = computed(() => [
 ]);
 
 function toggleTheme() {
-    // The popup is closed by PrimeVue immediately after this command. The
-    // palette changes in its after-leave hook, once it is no longer visible.
-    themeChangePending.value = true;
-}
-
-function applyPendingThemeChange() {
-    if (!themeChangePending.value) return;
-
-    themeChangePending.value = false;
-    applyThemeToggle();
+    isDark.value = !isDark.value;
+    document.documentElement.classList.toggle('app-dark', isDark.value);
 }
 
 async function showRouteToast(code) {
@@ -199,14 +184,7 @@ const companyMenuItems = computed(() => [
                                         <span>John Doe</span>
                                         <ChevronDown class="app-sidebar-profile-chevron" />
                                     </SidebarMenuButton>
-                                    <Menu
-                                        ref="userMenu"
-                                        id="user_menu"
-                                        class="app-user-menu"
-                                        :model="userMenuItems"
-                                        :popup="true"
-                                        :pt="{ transition: userMenuTransition }"
-                                    />
+                                    <Menu ref="userMenu" id="user_menu" class="app-user-menu" :model="userMenuItems" :popup="true" />
                                 </SidebarMenuItem>
                             </SidebarMenu>
                         </SidebarFooter>
@@ -222,3 +200,4 @@ const companyMenuItems = computed(() => [
         </SidebarLayout>
     </div>
 </template>
+
