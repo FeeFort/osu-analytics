@@ -42,23 +42,6 @@
   box-sizing: inherit;
 }
 
-/* Keep theme changes in sync across PrimeVue surfaces and the custom shell. */
-html,
-body,
-#app,
-#app * {
-  transition-property: background-color, color, border-color, box-shadow, fill, stroke;
-  transition-duration: 180ms;
-  transition-timing-function: ease;
-}
-
-/* Do not let the global theme transition interfere with sidebar collapsing. */
-.app-sidebar,
-.app-sidebar * {
-  transition-duration: 250ms;
-  transition-timing-function: cubic-bezier(.4, 0, .2, 1);
-}
-
 html,
 body,
 #app {
@@ -572,27 +555,6 @@ select {
 .app-user-menu .p-menu-item.app-user-menu-logout:hover .p-menu-item-icon svg {
   color: #ef4444 !important;
   stroke: currentColor !important;
-}
-
-/* Theme transition for the actual PrimeVue state layer. This keeps the active
-   item from lagging behind the rest of the layout. */
-.p-sidebar .app-sidebar-menu-button,
-.p-sidebar .app-sidebar-menu-button::before,
-.p-sidebar .app-sidebar-menu-button > span,
-.p-sidebar .app-sidebar-menu-button > svg,
-.app-user-menu .p-menu-item-link,
-.app-user-menu .p-menu-item-label,
-.app-user-menu .p-menu-item-icon {
-  transition-duration: 180ms !important;
-  transition-timing-function: ease !important;
-}
-
-.app-sidebar .p-sidebar-panel,
-.app-sidebar .p-sidebar-aside,
-.app-sidebar .p-sidebar-group-label,
-.app-sidebar .p-sidebar-menu-button,
-.app-sidebar .p-sidebar-menu-button[data-active="true"] {
-  transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, width 250ms cubic-bezier(.4, 0, .2, 1), padding 250ms cubic-bezier(.4, 0, .2, 1), gap 250ms cubic-bezier(.4, 0, .2, 1) !important;
 }
 
 /* Active item follows the current theme, just like hover. */

@@ -13,6 +13,7 @@ const selectedMetric = ref('pp')
 let performanceChart
 let themeObserver
 let isPeriodTransitioning = false
+let themeUpdateFrame
 
 const periodOptions = [
   { label: 'Last Week', value: 'week' },
@@ -382,7 +383,14 @@ onMounted(() => {
   renderPerformanceChart()
 
   themeObserver = new MutationObserver(() => {
-    requestAnimationFrame(() => updatePerformanceChart({ animate: false }))
+    cancelAnimationFrame(themeUpdateFrame)
+    themeUpdateFrame = requestAnimationFrame(() => {
+      if (!performanceChart) return
+      // Chart.js draws on canvas and does not participate in CSS transitions.
+      // Re-read the computed theme colors after the class mutation and redraw
+      // immediately, without the default dataset animation.
+      updatePerformanceChart({ animate: false })
+    })
   })
   themeObserver.observe(document.documentElement, {
     attributes: true,
@@ -393,6 +401,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   themeObserver?.disconnect()
   cancelAnimationFrame(periodAnimationFrame)
+  cancelAnimationFrame(themeUpdateFrame)
   performanceChart?.destroy()
 })
 
