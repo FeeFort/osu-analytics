@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { getErrorState, isToastErrorCode } from '../error-config'
 
 const routes = [
   {
@@ -18,13 +19,25 @@ const routes = [
   },
   {
     path: '/news',
-    component: () => import('../views/NotFound.vue'),
-    meta: { title: 'News' }
+    redirect: {
+      name: 'error',
+      params: { code: '404' },
+      query: { from: '/news' }
+    }
+  },
+  {
+    path: '/error/:code(400|401|403|404|408|429|500|502|503|504)',
+    name: 'error',
+    component: () => import('../views/ErrorPage.vue'),
+    meta: { title: 'Error', isErrorPage: true }
   },
   {
     path: '/:pathMatch(.*)*',
-    component: () => import('../views/NotFound.vue'),
-    meta: { title: 'Page Not Found' }
+    redirect: (to) => ({
+      name: 'error',
+      params: { code: '404' },
+      query: { from: to.fullPath }
+    })
   }
 ]
 
@@ -36,11 +49,28 @@ const router = createRouter({
   }
 })
 
-// ÐŸÑ€Ð¾ÐºÐ¸Ð´Ñ‹Ð²Ð°ÐµÐ¼ title ÑÑ‚Ñ€Ð°Ð½Ð¸Ñ†Ñ‹ Ð² <title> Ð´Ð¾ÐºÑƒÐ¼ÐµÐ½Ñ‚Ð°
 router.beforeEach((to) => {
-      document.title = to.meta.title ? `${to.meta.title} — MySite` : 'MySite'
+  if (to.name === 'error' && isToastErrorCode(to.params.code)) {
+    const fromPath = typeof to.query.from === 'string' && to.query.from !== to.fullPath
+      ? to.query.from
+      : '/'
+    const resolved = router.resolve(fromPath)
+
+    return {
+      path: resolved.path,
+      query: {
+        ...resolved.query,
+        errorToast: String(to.params.code)
+      },
+      hash: resolved.hash
+    }
+  }
+
+  const pageTitle = to.name === 'error'
+    ? getErrorState(to.params.code).title
+    : to.meta.title
+
+  document.title = pageTitle ? `${pageTitle} - MySite` : 'MySite'
 })
 
 export default router
-
-

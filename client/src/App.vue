@@ -21,19 +21,26 @@ import SidebarMenuSubItem from 'primevue/sidebarmenusubitem';
 import SidebarPanel from 'primevue/sidebarpanel';
 import SidebarSpacer from 'primevue/sidebarspacer';
 import Menu from 'primevue/menu';
+import Toast from 'primevue/toast';
 import Avatar from 'primevue/avatar';
 import AvatarGroup from 'primevue/avatargroup';
-import { computed, ref } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import { ChevronDown, Settings, Info, LogOut, Moon, Newspaper, Scale, Search, Sun, UserRound } from '@lucide/vue';
+import { useToast } from 'primevue/usetoast';
 import { useRouter, useRoute } from 'vue-router';
 import logoLight from './assets/logo-light.png';
 import logoDark from './assets/logo-dark.png';
+import { getErrorState, isPageErrorCode } from './error-config';
 
 const activeCompany = ref({ name: 'Acme Inc', logo: 'A', color: 'from-violet-500 to-indigo-600' });
 const isDark = ref(document.documentElement.classList.contains('app-dark'));
 const router = useRouter();
 const route = useRoute();
+const isErrorRoute = computed(() => route.meta.isErrorPage === true);
+const shouldUseFullPageError = computed(() => isErrorRoute.value && isPageErrorCode(route.params.code));
 const logo = computed(() => (isDark.value ? logoDark : logoLight));
+const toast = useToast();
+const handledToastKey = ref('');
 const userMenuItems = computed(() => [
     { label: 'Profile', icon: UserRound, command: () => router.push('/') },
     { label: 'Settings', icon: Settings },
@@ -47,6 +54,47 @@ function toggleTheme() {
     isDark.value = !isDark.value;
     document.documentElement.classList.toggle('app-dark', isDark.value);
 }
+
+async function showRouteToast(code) {
+    const toastState = getErrorState(code);
+    await nextTick();
+    toast.removeGroup('app-errors');
+    toast.add({
+        group: 'app-errors',
+        severity: toastState.severity,
+        summary: toastState.title,
+        detail: toastState.text,
+        life: toastState.life
+    });
+}
+
+function clearToastQuery() {
+    const nextQuery = { ...route.query };
+    delete nextQuery.errorToast;
+    router.replace({
+        path: route.path,
+        query: nextQuery,
+        hash: route.hash
+    });
+}
+
+watch(
+    () => route.query.errorToast,
+    async (errorToast) => {
+        const code = typeof errorToast === 'string' ? errorToast : '';
+        const toastKey = `${route.fullPath}::${code}`;
+
+        if (!code || handledToastKey.value === toastKey || isPageErrorCode(code)) {
+            return;
+        }
+
+        handledToastKey.value = toastKey;
+        await showRouteToast(code);
+        clearToastQuery();
+    },
+    { immediate: true }
+);
+
 const companyMenuItems = computed(() => [
     ...companies.map((c) => ({
         label: c.name,
@@ -62,7 +110,13 @@ const companyMenuItems = computed(() => [
 </script>
 
 <template>
-    <div class="border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden">
+    <Toast group="app-errors" position="top-right" class="app-toast" />
+
+    <main v-if="shouldUseFullPageError" class="app-page-content app-page-content--error">
+        <router-view />
+    </main>
+
+    <div v-else class="border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden">
         <SidebarLayout class="app-shell-layout min-h-192! relative!">
             <Sidebar id="menu-demo" class="app-sidebar" width="20rem" iconWidth="5.5rem">
                 <SidebarSpacer />
