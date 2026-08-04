@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import PrimeVue from 'primevue/config'
+import ToastService from 'primevue/toastservice'
 import MyPreset from './theme.js'
 import router from './router'
 import '@primeuix/styles'
@@ -18,6 +19,7 @@ app.use(PrimeVue, {
     license: import.meta.env.VITE_PRIMEUI_LICENSE_KEY
 })
 
+app.use(ToastService)
 app.use(router)
 
 app.mount('#app')
