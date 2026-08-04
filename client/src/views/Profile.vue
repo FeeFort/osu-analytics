@@ -29,6 +29,44 @@ const periodDays = {
 }
 
 let periodAnimationFrame
+let metricAnimationFrame
+
+// Chart.js redraws the crosshair via afterDraw on every hover/mousemove
+// event using the raw, instant coordinates of the active point - there's
+// no built-in tweening for custom plugins, so without this the line/ring
+// snaps between points instantly even though the HTML tooltip box glides.
+// We keep a small lerp loop that chases the target position and drives
+// its own chart.draw() calls, independent of Chart.js's own animation
+// system, so the ring/line motion matches the div tooltip's CSS transition.
+let crosshairCurrent = null
+let crosshairTarget = null
+let crosshairRafId = null
+const CROSSHAIR_EASE = 0.22
+const CROSSHAIR_SNAP_EPSILON = 0.4
+
+function stepCrosshair(chart) {
+  if (!crosshairCurrent || !crosshairTarget) {
+    crosshairRafId = null
+    return
+  }
+
+  const dx = crosshairTarget.x - crosshairCurrent.x
+  const dy = crosshairTarget.y - crosshairCurrent.y
+
+  if (Math.abs(dx) < CROSSHAIR_SNAP_EPSILON && Math.abs(dy) < CROSSHAIR_SNAP_EPSILON) {
+    crosshairCurrent = { ...crosshairTarget }
+    crosshairRafId = null
+    chart.draw()
+    return
+  }
+
+  crosshairCurrent = {
+    x: crosshairCurrent.x + dx * CROSSHAIR_EASE,
+    y: crosshairCurrent.y + dy * CROSSHAIR_EASE
+  }
+  chart.draw()
+  crosshairRafId = requestAnimationFrame(() => stepCrosshair(chart))
+}
 
 const crosshairPlugin = {
   id: 'performanceCrosshair',
@@ -36,10 +74,31 @@ const crosshairPlugin = {
     if (isPeriodTransitioning) return
 
     const activeElements = chart.getActiveElements()
-    if (!activeElements.length) return
+    if (!activeElements.length) {
+      crosshairCurrent = null
+      crosshairTarget = null
+      if (crosshairRafId) {
+        cancelAnimationFrame(crosshairRafId)
+        crosshairRafId = null
+      }
+      return
+    }
 
     const element = activeElements[0].element
-    const position = element.tooltipPosition ? element.tooltipPosition() : element
+    const rawPosition = element.tooltipPosition ? element.tooltipPosition() : element
+    crosshairTarget = { x: rawPosition.x, y: rawPosition.y }
+
+    if (!crosshairCurrent) {
+      crosshairCurrent = { ...crosshairTarget }
+    } else if (!crosshairRafId) {
+      const dx = crosshairTarget.x - crosshairCurrent.x
+      const dy = crosshairTarget.y - crosshairCurrent.y
+      if (Math.abs(dx) >= CROSSHAIR_SNAP_EPSILON || Math.abs(dy) >= CROSSHAIR_SNAP_EPSILON) {
+        crosshairRafId = requestAnimationFrame(() => stepCrosshair(chart))
+      }
+    }
+
+    const position = crosshairCurrent
     const { left, top } = chart.chartArea
     const { bottom } = chart.chartArea
     const context = chart.ctx
@@ -96,6 +155,25 @@ function createDailyChartData(days, basePp, baseRank) {
 }
 
 const masterChartData = createDailyChartData(periodDays.year, 520, 1240)
+const currentPp = 566
+const currentRank = 849000
+const ppDelta = masterChartData.pp.at(-1) - masterChartData.pp.at(-2)
+const rankDelta = (masterChartData.rank.at(-1) - masterChartData.rank.at(-2)) * 1000
+
+function formatMetricNumber(value) {
+  return new Intl.NumberFormat('en-US').format(Math.abs(Math.round(value))).replace(/,/g, ' ')
+}
+
+function formatDelta(value) {
+  return `${value >= 0 ? '+' : '−'}${formatMetricNumber(value)}`
+}
+
+function deltaClass(value) {
+  if (value > 0) return 'performance-metric-delta-positive'
+  if (value < 0) return 'performance-metric-delta-negative'
+  return 'performance-metric-delta-neutral'
+}
+
 const chartData = {
   week: {
     labels: masterChartData.labels.slice(-periodDays.week),
@@ -160,11 +238,13 @@ function externalTooltipHandler(context) {
       <span style="color: ${changeColor};">${formattedChange}</span>
     </span>
   `
-  tooltipElement.style.transition = 'opacity 120ms ease, left 260ms ease-out, top 260ms ease-out'
-  tooltipElement.style.willChange = 'left, top, opacity'
+  // Position via transform (compositor-only, avoids left/top layout
+  // thrashing) but set the resolved value directly rather than through
+  // CSS custom properties: unregistered custom props don't interpolate
+  // on transition (they jump discretely), which silently killed the
+  // animation even though transition-property: transform was declared.
   tooltipElement.style.opacity = '1'
-  tooltipElement.style.left = `${tooltip.caretX}px`
-  tooltipElement.style.top = `${tooltip.caretY}px`
+  tooltipElement.style.transform = `translate3d(calc(${tooltip.caretX}px - 50%), calc(${tooltip.caretY}px - 100% - 12px), 0)`
 }
 
 function getChartRange(period = selectedPeriod.value) {
@@ -175,7 +255,7 @@ function getChartRange(period = selectedPeriod.value) {
 }
 
 function getYRange(period, metric = selectedMetric.value) {
-  const values = masterChartData[metric].slice(-periodDays[period])
+  const values = masterChartData[metric].slice(-periodDays[period]).map((value) => toPlotValue(metric, value))
   const dataMin = Math.min(...values)
   const dataMax = Math.max(...values)
   const dataRange = dataMax - dataMin || Math.max(Math.abs(dataMax) * 0.1, 1)
@@ -241,17 +321,21 @@ function getChartOptions(textColor, borderColor, currentData, range = getChartRa
         grid: { color: borderColor },
         ticks: {
           color: textColor,
-          callback: (value) => Math.round(value)
+          callback: (value) => Math.round(Math.abs(value))
         }
       }
     }
   }
 }
 
+function toPlotValue(metric, value) {
+  return metric === 'rank' ? -value : value
+}
+
 function getFullDataset(metric = selectedMetric.value) {
   return masterChartData[metric].map((value, index) => ({
     x: masterChartData.offsets[index],
-    y: value
+    y: toPlotValue(metric, value)
   }))
 }
 
@@ -273,7 +357,7 @@ function renderPerformanceChart() {
         borderWidth: 2,
         pointRadius: 0,
         pointHoverRadius: 0,
-        fill: true,
+        fill: 'start',
         tension: 0.35
       }]
     },
@@ -296,6 +380,7 @@ function updatePerformanceChart({ animate = true } = {}) {
     performanceChart.data.datasets[0].data = getFullDataset()
     performanceChart.data.datasets[0].borderColor = primaryColor
     performanceChart.data.datasets[0].backgroundColor = `${primaryColor}22`
+    performanceChart.data.datasets[0].fill = 'start'
     performanceChart.options = getChartOptions(
       textColor,
       borderColor,
@@ -375,9 +460,51 @@ function animatePeriodRange(period) {
   periodAnimationFrame = requestAnimationFrame(step)
 }
 
-watch(selectedPeriod, (period) => animatePeriodRange(period))
-watch(selectedMetric, () => updatePerformanceChart({ animate: true }))
+function animateMetricChange(metric, previousMetric) {
+  if (!performanceChart || metric === previousMetric) return
 
+  cancelAnimationFrame(metricAnimationFrame)
+  const chart = performanceChart
+  const dataset = chart.data.datasets[0]
+  const fromData = getFullDataset(previousMetric)
+  const toData = getFullDataset(metric)
+  const fromRange = getYRange(selectedPeriod.value, previousMetric)
+  const toRange = getYRange(selectedPeriod.value, metric)
+  const fromValue = masterChartData[previousMetric].at(-1)
+  const toValue = masterChartData[metric].at(-1)
+  const start = performance.now()
+  const duration = 650
+  const ease = (value) => value < 0.5 ? 4 * value * value * value : 1 - Math.pow(-2 * value + 2, 3) / 2
+
+  isPeriodTransitioning = true
+  chart.options.events = []
+  dataset.fill = 'start'
+  chart.setActiveElements([])
+  chart.tooltip?.setActiveElements([], { x: 0, y: 0 })
+
+  const step = (now) => {
+    const progress = Math.min((now - start) / duration, 1)
+    const eased = ease(progress)
+    dataset.data = toData.map((point, index) => ({ x: point.x, y: fromData[index].y + (point.y - fromData[index].y) * eased }))
+    chart.options.scales.y.min = fromRange.min + (toRange.min - fromRange.min) * eased
+    chart.options.scales.y.max = fromRange.max + (toRange.max - fromRange.max) * eased
+    chart.update('none')
+
+    if (progress < 1) {
+      metricAnimationFrame = requestAnimationFrame(step)
+    } else {
+      dataset.data = toData
+      isPeriodTransitioning = false
+      chart.options.events = ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove']
+      chart.update('none')
+    }
+  }
+
+  metricAnimationFrame = requestAnimationFrame(step)
+}
+
+watch(selectedPeriod, (period) => animatePeriodRange(period))
+watch(selectedMetric, (metric, previousMetric) => animateMetricChange(metric, previousMetric))
 onMounted(() => {
   renderPerformanceChart()
 
@@ -393,6 +520,8 @@ onMounted(() => {
 onBeforeUnmount(() => {
   themeObserver?.disconnect()
   cancelAnimationFrame(periodAnimationFrame)
+  cancelAnimationFrame(metricAnimationFrame)
+  if (crosshairRafId) cancelAnimationFrame(crosshairRafId)
   performanceChart?.destroy()
 })
 
@@ -411,15 +540,15 @@ const skillProfileRows = [
   { label: 'Stars', icon: Star, color: '#FBBF24', min: '—', max: '—', avg: '—' }
 ]
 
-// Ð¡Ñ‚Ñ€Ð°Ð½Ð° — Ñ„Ð»Ð°Ð³ Ð»ÐµÐ¶Ð¸Ñ‚ Ð² assets/countries/{code}.png, code — ÐºÐ¾Ñ€Ð¾Ñ‚ÐºÐ¸Ð¹ ÐºÐ¾Ð´ ÑÑ‚Ñ€Ð°Ð½Ñ‹
+// ÃÂ¡Ã‘â€šÃ‘â‚¬ÃÂ°ÃÂ½ÃÂ° — Ã‘â€žÃÂ»ÃÂ°ÃÂ³ ÃÂ»ÃÂµÃÂ¶ÃÂ¸Ã‘â€š ÃÂ² assets/countries/{code}.png, code — ÃÂºÃÂ¾Ã‘â‚¬ÃÂ¾Ã‘â€šÃÂºÃÂ¸ÃÂ¹ ÃÂºÃÂ¾ÃÂ´ Ã‘ÂÃ‘â€šÃ‘â‚¬ÃÂ°ÃÂ½Ã‘â€¹
 const country = {
   code: 'ru',
   name: 'Russia'
 }
 
-// Ð‘ÐµÐ¹Ð´Ð¶Ð¸ — Ð·Ð°Ð´Ð°Ñ‘Ð¼ Ñ‚Ð¾Ð»ÑŒÐºÐ¾ Ð°ÐºÑ†ÐµÐ½Ñ‚Ð½Ñ‹Ð¹ Ñ†Ð²ÐµÑ‚, Ñ„Ð¾Ð½ Ð¸ Ñ€Ð°Ð¼ÐºÐ° Ð²Ñ‹Ñ‡Ð¸ÑÐ»ÑÑŽÑ‚ÑÑ
-// Ð°Ð²Ñ‚Ð¾Ð¼Ð°Ñ‚Ð¸Ñ‡ÐµÑÐºÐ¸ Ñ‡ÐµÑ€ÐµÐ· color-mix() Ð² CSS Ð¾Ñ‚ Ñ‚ÐµÐºÑƒÑ‰ÐµÐ³Ð¾ Ñ†Ð²ÐµÑ‚Ð° ÐºÐ°Ñ€Ñ‚Ð¾Ñ‡ÐºÐ¸ —
-// Ð° Ð·Ð½Ð°Ñ‡Ð¸Ñ‚ ÑÐ°Ð¼Ð¸ Ð¿Ð¾Ð´ÑÑ‚Ñ€Ð°Ð¸Ð²Ð°ÑŽÑ‚ÑÑ Ð¿Ð¾Ð´ ÑÐ²ÐµÑ‚Ð»ÑƒÑŽ/Ñ‚Ñ‘Ð¼Ð½ÑƒÑŽ Ñ‚ÐµÐ¼Ñƒ.
+// Ãâ€˜ÃÂµÃÂ¹ÃÂ´ÃÂ¶ÃÂ¸ — ÃÂ·ÃÂ°ÃÂ´ÃÂ°Ã‘â€˜ÃÂ¼ Ã‘â€šÃÂ¾ÃÂ»Ã‘Å’ÃÂºÃÂ¾ ÃÂ°ÃÂºÃ‘â€ ÃÂµÃÂ½Ã‘â€šÃÂ½Ã‘â€¹ÃÂ¹ Ã‘â€ ÃÂ²ÃÂµÃ‘â€š, Ã‘â€žÃÂ¾ÃÂ½ ÃÂ¸ Ã‘â‚¬ÃÂ°ÃÂ¼ÃÂºÃÂ° ÃÂ²Ã‘â€¹Ã‘â€¡ÃÂ¸Ã‘ÂÃÂ»Ã‘ÂÃ‘Å½Ã‘â€šÃ‘ÂÃ‘Â
+// ÃÂ°ÃÂ²Ã‘â€šÃÂ¾ÃÂ¼ÃÂ°Ã‘â€šÃÂ¸Ã‘â€¡ÃÂµÃ‘ÂÃÂºÃÂ¸ Ã‘â€¡ÃÂµÃ‘â‚¬ÃÂµÃÂ· color-mix() ÃÂ² CSS ÃÂ¾Ã‘â€š Ã‘â€šÃÂµÃÂºÃ‘Æ’Ã‘â€°ÃÂµÃÂ³ÃÂ¾ Ã‘â€ ÃÂ²ÃÂµÃ‘â€šÃÂ° ÃÂºÃÂ°Ã‘â‚¬Ã‘â€šÃÂ¾Ã‘â€¡ÃÂºÃÂ¸ —
+// ÃÂ° ÃÂ·ÃÂ½ÃÂ°Ã‘â€¡ÃÂ¸Ã‘â€š Ã‘ÂÃÂ°ÃÂ¼ÃÂ¸ ÃÂ¿ÃÂ¾ÃÂ´Ã‘ÂÃ‘â€šÃ‘â‚¬ÃÂ°ÃÂ¸ÃÂ²ÃÂ°Ã‘Å½Ã‘â€šÃ‘ÂÃ‘Â ÃÂ¿ÃÂ¾ÃÂ´ Ã‘ÂÃÂ²ÃÂµÃ‘â€šÃÂ»Ã‘Æ’Ã‘Å½/Ã‘â€šÃ‘â€˜ÃÂ¼ÃÂ½Ã‘Æ’Ã‘Å½ Ã‘â€šÃÂµÃÂ¼Ã‘Æ’.
 const badges = [
   {
     label: 'Founder',
@@ -447,7 +576,7 @@ const badges = [
 
 <template>
   <div class="profile-page">
-    <!-- Ð¨Ð°Ð¿ÐºÐ° Ð¿Ñ€Ð¾Ñ„Ð¸Ð»Ñ: Ð°Ð²Ð°Ñ‚Ð°Ñ€ + Ð¼ÐµÑ‚Ð° + ÑÑ‚Ð°Ñ‚Ñ‹ -->
+    <!-- ÃÂ¨ÃÂ°ÃÂ¿ÃÂºÃÂ° ÃÂ¿Ã‘â‚¬ÃÂ¾Ã‘â€žÃÂ¸ÃÂ»Ã‘Â: ÃÂ°ÃÂ²ÃÂ°Ã‘â€šÃÂ°Ã‘â‚¬ + ÃÂ¼ÃÂµÃ‘â€šÃÂ° + Ã‘ÂÃ‘â€šÃÂ°Ã‘â€šÃ‘â€¹ -->
     <section class="panel profile-header">
       <div class="avatar-block">
         <div class="avatar-placeholder" />
@@ -481,7 +610,7 @@ const badges = [
       </div>
     </section>
 
-    <!-- Ð ÑÐ´ 1: Skill Profile / Mod Performance / Info -->
+    <!-- ÃÂ Ã‘ÂÃÂ´ 1: Skill Profile / Mod Performance / Info -->
     <section class="panel panel-performance">
       <div class="panel-heading panel-heading-with-controls">
         <h2 class="panel-title">Performance History</h2>
@@ -514,11 +643,17 @@ const badges = [
         <div class="performance-metrics">
           <div class="performance-metric">
             <span class="performance-metric-label">Current PP</span>
-            <span class="performance-metric-value">—</span>
+            <span class="performance-metric-value">
+              {{ formatMetricNumber(currentPp) }}
+              <small class="performance-metric-delta" :class="deltaClass(ppDelta)">({{ formatDelta(ppDelta) }})</small>
+            </span>
           </div>
           <div class="performance-metric">
             <span class="performance-metric-label">Global Rank</span>
-            <span class="performance-metric-value">—</span>
+            <span class="performance-metric-value">
+              #{{ formatMetricNumber(currentRank) }}
+              <small class="performance-metric-delta" :class="deltaClass(rankDelta)">({{ formatDelta(rankDelta) }})</small>
+            </span>
           </div>
         </div>
         <div class="performance-chart-placeholder">
@@ -594,7 +729,7 @@ const badges = [
   gap: 24px;
 }
 
-/* ÐžÐ±Ñ‰Ð¸Ð¹ ÑÑ‚Ð¸Ð»ÑŒ ÐºÐ°Ñ€Ñ‚Ð¾Ñ‡ÐºÐ¸ — Ñ‚Ð¾Ñ‚ Ð¶Ðµ ÑÐ·Ñ‹Ðº, Ñ‡Ñ‚Ð¾ Ñƒ ÑÐ°Ð¹Ð´Ð±Ð°Ñ€Ð° */
+/* ÃÅ¾ÃÂ±Ã‘â€°ÃÂ¸ÃÂ¹ Ã‘ÂÃ‘â€šÃÂ¸ÃÂ»Ã‘Å’ ÃÂºÃÂ°Ã‘â‚¬Ã‘â€šÃÂ¾Ã‘â€¡ÃÂºÃÂ¸ — Ã‘â€šÃÂ¾Ã‘â€š ÃÂ¶ÃÂµ Ã‘ÂÃÂ·Ã‘â€¹ÃÂº, Ã‘â€¡Ã‘â€šÃÂ¾ Ã‘Æ’ Ã‘ÂÃÂ°ÃÂ¹ÃÂ´ÃÂ±ÃÂ°Ã‘â‚¬ÃÂ° */
 .panel {
   background: var(--p-content-background);
   border: 1px solid var(--p-content-border-color);
@@ -710,7 +845,8 @@ const badges = [
   flex-direction: column;
   justify-content: center;
   gap: 8px;
-  padding: 24px;
+  min-width: 220px;
+  padding: 24px 12px 24px 24px;
 }
 
 .performance-metric-label {
@@ -719,15 +855,42 @@ const badges = [
 }
 
 .performance-metric-value {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 220px;
+  white-space: nowrap;
   font-size: 30px;
   font-weight: 700;
   color: var(--p-text-color);
+}
+
+.performance-metric-delta {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--p-text-muted-color);
+  white-space: nowrap;
+}
+
+.performance-metric-delta-neutral {
+  color: var(--p-text-muted-color);
+}
+
+.performance-metric-delta-positive {
+  color: #4ade80;
+}
+
+.performance-metric-delta-negative {
+  color: #f87171;
 }
 
 .performance-chart-placeholder {
   position: relative;
   min-height: 0;
   height: 100%;
+  width: calc(100% - 128px);
+  margin-left: 64px;
+  transform: translateX(64px);
 }
 
 .performance-chart-placeholder canvas {
@@ -736,7 +899,7 @@ const badges = [
   opacity: 1;
 }
 
-:global(.performance-tooltip) {
+:global(#app .performance-tooltip) {
   position: absolute;
   z-index: 2;
   min-width: 118px;
@@ -748,8 +911,27 @@ const badges = [
   color: var(--p-text-color);
   pointer-events: none;
   opacity: 0;
-  transform: translate(-50%, calc(-100% - 12px));
-  transition: opacity 100ms ease, left 180ms ease-out, top 180ms ease-out;
+  left: 0;
+  top: 0;
+  transform: translate3d(calc(0px - 50%), calc(0px - 100% - 12px), 0);
+  /* #app's global theme-transition rule targets every element via
+     :where(*), which has zero specificity, so that rule's real
+     specificity is just #app (an ID). A plain .performance-tooltip
+     class selector loses to that on transition-property even with
+     !important on both sides (id beats class when importance ties) -
+     that's why transform was silently dropped from the animated
+     properties. Prefixing with #app matches its specificity so ours
+     wins. transform (not left/top) so this stays compositor-only and
+     doesn't get dropped frames from layout thrashing under frequent
+     updates. The actual translate values are set inline from JS on
+     every update - do not route them through CSS custom properties
+     here, they won't interpolate on transition unless registered via
+     @property. */
+  transition-property: opacity, transform !important;
+  transition-duration: 120ms, 260ms !important;
+  transition-timing-function: ease, ease-out !important;
+  transition-delay: 0ms;
+  will-change: transform, opacity;
 }
 
 :global(.performance-tooltip-date),
@@ -866,7 +1048,7 @@ const badges = [
   flex: 0 0 auto;
 }
 
-/* Ð¨Ð°Ð¿ÐºÐ° Ð¿Ñ€Ð¾Ñ„Ð¸Ð»Ñ */
+/* ÃÂ¨ÃÂ°ÃÂ¿ÃÂºÃÂ° ÃÂ¿Ã‘â‚¬ÃÂ¾Ã‘â€žÃÂ¸ÃÂ»Ã‘Â */
 .profile-header {
   display: flex;
   align-items: center;
@@ -973,7 +1155,7 @@ const badges = [
   min-height: 360px;
 }
 
-/* Ð¡ÐµÑ‚ÐºÐ¸ Ñ€ÑÐ´Ð¾Ð² ÐºÐ°Ñ€Ñ‚Ð¾Ñ‡ÐµÐº — Ð¿Ñ€Ð¾Ð¿Ð¾Ñ€Ñ†Ð¸Ð¸ ÑˆÐ¸Ñ€Ð¸Ð½ Ð¿Ñ€Ð¸Ð¼ÐµÑ€Ð½Ð¾ ÐºÐ°Ðº Ð½Ð° Ñ€ÐµÑ„ÐµÑ€ÐµÐ½ÑÐµ */
+/* ÃÂ¡ÃÂµÃ‘â€šÃÂºÃÂ¸ Ã‘â‚¬Ã‘ÂÃÂ´ÃÂ¾ÃÂ² ÃÂºÃÂ°Ã‘â‚¬Ã‘â€šÃÂ¾Ã‘â€¡ÃÂµÃÂº — ÃÂ¿Ã‘â‚¬ÃÂ¾ÃÂ¿ÃÂ¾Ã‘â‚¬Ã‘â€ ÃÂ¸ÃÂ¸ Ã‘Ë†ÃÂ¸Ã‘â‚¬ÃÂ¸ÃÂ½ ÃÂ¿Ã‘â‚¬ÃÂ¸ÃÂ¼ÃÂµÃ‘â‚¬ÃÂ½ÃÂ¾ ÃÂºÃÂ°ÃÂº ÃÂ½ÃÂ° Ã‘â‚¬ÃÂµÃ‘â€žÃÂµÃ‘â‚¬ÃÂµÃÂ½Ã‘ÂÃÂµ */
 .grid-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1007,4 +1189,3 @@ const badges = [
   }
 }
 </style>
-
