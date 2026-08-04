@@ -132,7 +132,7 @@ const companyMenuItems = computed(() => [
         <router-view />
     </main>
 
-    <div v-else class="border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden">
+    <div v-else class="app-theme-shell border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden">
         <SidebarLayout class="app-shell-layout min-h-192! relative!">
             <Sidebar id="menu-demo" class="app-sidebar" width="20rem" iconWidth="5.5rem">
                 <SidebarSpacer />
