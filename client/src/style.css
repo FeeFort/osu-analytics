@@ -118,20 +118,14 @@ select {
 /* Animate only large painted surfaces during a theme change. The class is
    controlled by the theme composable, so the sidebar and page share one
    duration. Text, icons, and canvas content deliberately change immediately. */
-.app-theme-transition body,
-.app-theme-transition #app,
-.app-theme-transition .app-shell-layout,
-.app-theme-transition .app-theme-shell,
-.app-theme-transition .app-page-content,
-.app-theme-transition .app-sidebar,
-.app-theme-transition .app-sidebar .p-sidebar-aside,
-.app-theme-transition .app-sidebar .p-sidebar-panel,
-.app-theme-transition .app-sidebar .p-sidebar-header,
-.app-theme-transition .app-sidebar .p-sidebar-content,
-.app-theme-transition .app-sidebar .p-sidebar-footer,
-.app-theme-transition .app-sidebar .p-sidebar-spacer,
-.app-theme-transition .panel {
-  transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease !important;
+.app-theme-transition :is(body, #app, .app-shell-layout, .app-theme-shell,
+  .app-page-content, .app-sidebar, .p-sidebar-aside, .p-sidebar-panel,
+  .p-sidebar-header, .p-sidebar-content, .p-sidebar-footer, .p-sidebar-spacer,
+  .panel, .panel-placeholder) {
+  transition-property: background-color, border-color, box-shadow !important;
+  transition-duration: 180ms !important;
+  transition-timing-function: ease !important;
+  transition-delay: 0ms !important;
 }
 
 /* Sidebar sizing */
