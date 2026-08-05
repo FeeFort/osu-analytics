@@ -443,7 +443,7 @@ const badges = [
 <template>
   <div class="profile-page">
     <!-- Ð¨Ð°Ð¿ÐºÐ° Ð¿Ñ€Ð¾Ñ„Ð¸Ð»Ñ: Ð°Ð²Ð°Ñ‚Ð°Ñ€ + Ð¼ÐµÑ‚Ð° + ÑÑ‚Ð°Ñ‚Ñ‹ -->
-    <section class="panel profile-header">
+    <section class="panel app-theme-surface profile-header">
       <div class="avatar-block">
         <div class="avatar-placeholder" />
       </div>
@@ -477,7 +477,7 @@ const badges = [
     </section>
 
     <!-- Ð ÑÐ´ 1: Skill Profile / Mod Performance / Info -->
-    <section class="panel panel-performance">
+    <section class="panel app-theme-surface panel-performance">
       <div class="panel-heading panel-heading-with-controls">
         <h2 class="panel-title">Performance History</h2>
         <div class="performance-controls">
@@ -523,7 +523,7 @@ const badges = [
     </section>
 
     <section class="grid-row">
-      <div class="panel">
+      <div class="panel app-theme-surface">
         <h2 class="panel-title">Skill Profile</h2>
         <div class="skill-profile-table" role="table" aria-label="Skill profile">
           <div class="skill-profile-row skill-profile-header" role="row">
@@ -554,29 +554,29 @@ const badges = [
           </div>
         </div>
       </div>
-      <div class="panel">
+      <div class="panel app-theme-surface">
         <h2 class="panel-title">Tournament Duel Rating</h2>
-        <div class="panel-placeholder" />
+        <div class="panel-placeholder app-theme-surface" />
       </div>
     </section>
 
     <section class="grid-row">
-      <div class="panel">
+      <div class="panel app-theme-surface">
         <h2 class="panel-title">Skillset Profile</h2>
-        <div class="panel-placeholder" />
+        <div class="panel-placeholder app-theme-surface" />
       </div>
-      <div class="panel">
+      <div class="panel app-theme-surface">
         <h2 class="panel-title">Top Plays</h2>
-        <div class="panel-placeholder" />
+        <div class="panel-placeholder app-theme-surface" />
       </div>
     </section>
 
-    <section class="panel panel-tournament-experience">
+    <section class="panel app-theme-surface panel-tournament-experience">
       <h2 class="panel-title">Tournament Experience</h2>
       <div class="experience-placeholders">
-        <div class="panel-placeholder" />
-        <div class="panel-placeholder" />
-        <div class="panel-placeholder" />
+        <div class="panel-placeholder app-theme-surface" />
+        <div class="panel-placeholder app-theme-surface" />
+        <div class="panel-placeholder app-theme-surface" />
       </div>
     </section>
   </div>
