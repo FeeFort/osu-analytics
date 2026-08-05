@@ -4,6 +4,7 @@ import { Chart, registerables } from 'chart.js'
 import { Crosshair, Gauge, Star, Target, Zap } from '@lucide/vue'
 import Select from 'primevue/select'
 import Badge from '../components/Badge.vue'
+import { THEME_TRANSITION_DURATION, useTheme } from '../composables/toggleTheme'
 
 Chart.register(...registerables)
 
@@ -11,9 +12,8 @@ const chartCanvas = ref(null)
 const selectedPeriod = ref('threeMonths')
 const selectedMetric = ref('pp')
 let performanceChart
-let themeObserver
 let isPeriodTransitioning = false
-let themeUpdateFrame
+const { isDark } = useTheme()
 
 const periodOptions = [
   { label: 'Last Week', value: 'week' },
@@ -97,25 +97,6 @@ function createDailyChartData(days, basePp, baseRank) {
 }
 
 const masterChartData = createDailyChartData(periodDays.year, 520, 1240)
-const chartData = {
-  week: {
-    labels: masterChartData.labels.slice(-periodDays.week),
-    pp: masterChartData.pp.slice(-periodDays.week),
-    rank: masterChartData.rank.slice(-periodDays.week)
-  },
-  month: {
-    labels: masterChartData.labels.slice(-periodDays.month),
-    pp: masterChartData.pp.slice(-periodDays.month),
-    rank: masterChartData.rank.slice(-periodDays.month)
-  },
-  threeMonths: {
-    labels: masterChartData.labels.slice(-periodDays.threeMonths),
-    pp: masterChartData.pp.slice(-periodDays.threeMonths),
-    rank: masterChartData.rank.slice(-periodDays.threeMonths)
-  },
-  year: masterChartData
-}
-
 const activeChartData = computed(() => masterChartData)
 
 function getCssColor(variable, fallback) {
@@ -192,7 +173,14 @@ function getTicksLimit(period = selectedPeriod.value) {
   return period === 'year' ? 12 : period === 'threeMonths' ? 6 : period === 'month' ? 6 : 7
 }
 
-function getChartOptions(textColor, borderColor, currentData, range = getChartRange(), yRange = getYRange(selectedPeriod.value)) {
+function getChartOptions(
+  textColor,
+  borderColor,
+  currentData,
+  range = getChartRange(),
+  yRange = getYRange(selectedPeriod.value),
+  { themeTransition = false } = {}
+) {
   return {
     responsive: true,
     maintainAspectRatio: false,
@@ -202,8 +190,8 @@ function getChartOptions(textColor, borderColor, currentData, range = getChartRa
       }
     },
     animation: {
-      duration: 1200,
-      easing: 'easeInOutCubic'
+      duration: themeTransition ? THEME_TRANSITION_DURATION : 1200,
+      easing: themeTransition ? 'linear' : 'easeInOutCubic'
     },
     plugins: {
       legend: { display: false },
@@ -283,8 +271,8 @@ function renderPerformanceChart() {
   })
 }
 
-function updatePerformanceChart({ animate = true } = {}) {
-  nextTick(() => {
+function updatePerformanceChart({ animate = true, themeTransition = false } = {}) {
+  const update = () => {
     if (!performanceChart) {
       renderPerformanceChart()
       return
@@ -305,10 +293,19 @@ function updatePerformanceChart({ animate = true } = {}) {
         min: performanceChart.options.scales.x.min,
         max: performanceChart.options.scales.x.max
       },
-      getYRange(selectedPeriod.value, selectedMetric.value)
+      getYRange(selectedPeriod.value, selectedMetric.value),
+      { themeTransition }
     )
-    performanceChart.update(animate ? 'active' : 'none')
-  })
+    // 'active' has a zero-duration transition for hover interactions. Theme
+    // changes must use Chart.js's normal animation mode instead.
+    performanceChart.update(themeTransition ? undefined : animate ? 'active' : 'none')
+  }
+
+  if (animate) {
+    nextTick(update)
+  } else {
+    update()
+  }
 }
 
 function animatePeriodRange(period) {
@@ -378,30 +375,19 @@ function animatePeriodRange(period) {
 
 watch(selectedPeriod, (period) => animatePeriodRange(period))
 watch(selectedMetric, () => updatePerformanceChart({ animate: true }))
+watch(isDark, () => {
+  if (!performanceChart) return
+
+  performanceChart.stop()
+  updatePerformanceChart({ animate: true, themeTransition: true })
+}, { flush: 'sync' })
 
 onMounted(() => {
   renderPerformanceChart()
-
-  themeObserver = new MutationObserver(() => {
-    cancelAnimationFrame(themeUpdateFrame)
-    themeUpdateFrame = requestAnimationFrame(() => {
-      if (!performanceChart) return
-      // Chart.js draws on canvas and does not participate in CSS transitions.
-      // Re-read the computed theme colors after the class mutation and redraw
-      // immediately, without the default dataset animation.
-      updatePerformanceChart({ animate: false })
-    })
-  })
-  themeObserver.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['class']
-  })
 })
 
 onBeforeUnmount(() => {
-  themeObserver?.disconnect()
   cancelAnimationFrame(periodAnimationFrame)
-  cancelAnimationFrame(themeUpdateFrame)
   performanceChart?.destroy()
 })
 

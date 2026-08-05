@@ -118,10 +118,31 @@ select {
 /* Animate only large painted surfaces during a theme change. The class is
    controlled by the theme composable, so the sidebar and page share one
    duration. Text, icons, and canvas content deliberately change immediately. */
+/* html paints only the browser canvas behind the document. Animating it in
+   addition to body creates two layered background transitions, which makes
+   the page background appear to finish late. */
+html.app-theme-transition {
+  transition: none !important;
+}
+
 .app-theme-transition :is(body, #app, .app-shell-layout, .app-theme-shell,
   .app-page-content, .app-sidebar, .p-sidebar-aside, .p-sidebar-panel,
   .p-sidebar-header, .p-sidebar-content, .p-sidebar-footer, .p-sidebar-spacer,
-  .panel, .panel-placeholder) {
+  .panel, .panel-placeholder, .p-card, .p-dialog, .p-drawer, .p-menu,
+  .p-popover, .p-datatable, .p-select-overlay) {
+  transition-property: background-color, border-color, box-shadow !important;
+  transition-duration: 180ms !important;
+  transition-timing-function: ease !important;
+  transition-delay: 0ms !important;
+}
+
+/* PrimeVue mounts menus outside #app. They share the same transition timing
+   while the global transition marker is present. */
+.app-theme-transition .p-menu,
+.app-theme-transition .p-popover,
+.app-theme-transition .p-select-overlay,
+.app-theme-transition .p-dialog,
+.app-theme-transition .p-drawer {
   transition-property: background-color, border-color, box-shadow !important;
   transition-duration: 180ms !important;
   transition-timing-function: ease !important;

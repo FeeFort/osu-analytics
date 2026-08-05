@@ -33,7 +33,6 @@ import logoDark from './assets/logo-dark.png';
 import { getErrorState, isPageErrorCode } from './error-config';
 import { useTheme } from './composables/toggleTheme';
 
-const activeCompany = ref({ name: 'Acme Inc', logo: 'A', color: 'from-violet-500 to-indigo-600' });
 const { isDark, toggleTheme: applyThemeToggle } = useTheme();
 const themeChangePending = ref(false);
 const userMenuTransition = {
@@ -110,19 +109,6 @@ watch(
     },
     { immediate: true }
 );
-
-const companyMenuItems = computed(() => [
-    ...companies.map((c) => ({
-        label: c.name,
-        logo: c.logo,
-        color: c.color,
-        active: activeCompany.value.name === c.name,
-        command: () => {
-            activeCompany.value = c;
-        }
-    })),
-    { separator: true }
-]);
 </script>
 
 <template>
