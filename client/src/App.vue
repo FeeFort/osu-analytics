@@ -31,9 +31,16 @@ import { useRouter, useRoute } from 'vue-router';
 import logoLight from './assets/logo-light.png';
 import logoDark from './assets/logo-dark.png';
 import { getErrorState, isPageErrorCode } from './error-config';
+import { useTheme } from './composables/toggleTheme';
 
-const activeCompany = ref({ name: 'Acme Inc', logo: 'A', color: 'from-violet-500 to-indigo-600' });
-const isDark = ref(document.documentElement.classList.contains('app-dark'));
+const { isDark, toggleTheme: applyThemeToggle } = useTheme();
+const themeChangePending = ref(false);
+const userMenuTransition = {
+    leaveActiveClass: 'app-user-menu-leave-active',
+    leaveFromClass: 'app-user-menu-leave-from',
+    leaveToClass: 'app-user-menu-leave-to',
+    onAfterLeave: applyPendingThemeChange
+};
 const router = useRouter();
 const route = useRoute();
 const isErrorRoute = computed(() => route.meta.isErrorPage === true);
@@ -51,8 +58,16 @@ const userMenuItems = computed(() => [
 ]);
 
 function toggleTheme() {
-    isDark.value = !isDark.value;
-    document.documentElement.classList.toggle('app-dark', isDark.value);
+    // The popup is closed by PrimeVue immediately after this command. The
+    // palette changes in its after-leave hook, once it is no longer visible.
+    themeChangePending.value = true;
+}
+
+function applyPendingThemeChange() {
+    if (!themeChangePending.value) return;
+
+    themeChangePending.value = false;
+    applyThemeToggle();
 }
 
 async function showRouteToast(code) {
@@ -94,19 +109,6 @@ watch(
     },
     { immediate: true }
 );
-
-const companyMenuItems = computed(() => [
-    ...companies.map((c) => ({
-        label: c.name,
-        logo: c.logo,
-        color: c.color,
-        active: activeCompany.value.name === c.name,
-        command: () => {
-            activeCompany.value = c;
-        }
-    })),
-    { separator: true }
-]);
 </script>
 
 <template>
@@ -116,9 +118,9 @@ const companyMenuItems = computed(() => [
         <router-view />
     </main>
 
-    <div v-else class="border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden">
+    <div v-else class="app-theme-shell app-theme-surface border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden">
         <SidebarLayout class="app-shell-layout min-h-192! relative!">
-            <Sidebar id="menu-demo" class="app-sidebar" width="20rem" iconWidth="5.5rem">
+            <Sidebar id="menu-demo" class="app-sidebar" width="20rem" collapsible="none">
                 <SidebarSpacer />
                 <SidebarAside>
                     <SidebarPanel>
@@ -127,7 +129,7 @@ const companyMenuItems = computed(() => [
                                 <SidebarMenuItem>
                                     <div class="app-sidebar-menu-button app-sidebar-header-button flex items-center gap-2">
                                         <div class="app-sidebar-logo-frame">
-                                            <img :src="logo" alt="Ð›Ð¾Ð³Ð¾Ñ‚Ð¸Ð¿" class="app-sidebar-logo" />
+                                            <img :src="logo" alt="logo" class="app-sidebar-logo" />
                                         </div>
                                     </div>
                                 </SidebarMenuItem>
@@ -184,7 +186,14 @@ const companyMenuItems = computed(() => [
                                         <span>John Doe</span>
                                         <ChevronDown class="app-sidebar-profile-chevron" />
                                     </SidebarMenuButton>
-                                    <Menu ref="userMenu" id="user_menu" class="app-user-menu" :model="userMenuItems" :popup="true" />
+                                    <Menu
+                                        ref="userMenu"
+                                        id="user_menu"
+                                        class="app-user-menu"
+                                        :model="userMenuItems"
+                                        :popup="true"
+                                        :pt="{ transition: userMenuTransition }"
+                                    />
                                 </SidebarMenuItem>
                             </SidebarMenu>
                         </SidebarFooter>
@@ -192,7 +201,7 @@ const companyMenuItems = computed(() => [
                 </SidebarAside>
             </Sidebar>
 
-            <SidebarMain>
+            <SidebarMain class="app-theme-surface">
                 <main class="app-page-content">
                     <router-view />
                 </main>

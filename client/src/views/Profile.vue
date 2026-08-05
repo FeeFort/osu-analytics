@@ -4,6 +4,7 @@ import { Chart, registerables } from 'chart.js'
 import { Crosshair, Gauge, Star, Target, Zap } from '@lucide/vue'
 import Select from 'primevue/select'
 import Badge from '../components/Badge.vue'
+import { THEME_TRANSITION_DURATION, useTheme } from '../composables/toggleTheme'
 
 Chart.register(...registerables)
 
@@ -11,8 +12,8 @@ const chartCanvas = ref(null)
 const selectedPeriod = ref('threeMonths')
 const selectedMetric = ref('pp')
 let performanceChart
-let themeObserver
 let isPeriodTransitioning = false
+const { isDark } = useTheme()
 
 const periodOptions = [
   { label: 'Last Week', value: 'week' },
@@ -67,6 +68,7 @@ function stepCrosshair(chart) {
   chart.draw()
   crosshairRafId = requestAnimationFrame(() => stepCrosshair(chart))
 }
+let themeGridAnimationFrame
 
 const crosshairPlugin = {
   id: 'performanceCrosshair',
@@ -201,6 +203,78 @@ function getCssColor(variable, fallback) {
     .trim() || fallback
 }
 
+function parseColor(color) {
+  const value = color.trim()
+  const hex = value.match(/^#([\da-f]{3,8})$/i)?.[1]
+
+  if (hex) {
+    const expanded = hex.length <= 4 ? [...hex].map((character) => character.repeat(2)).join('') : hex
+    return {
+      red: Number.parseInt(expanded.slice(0, 2), 16),
+      green: Number.parseInt(expanded.slice(2, 4), 16),
+      blue: Number.parseInt(expanded.slice(4, 6), 16),
+      alpha: expanded.length === 8 ? Number.parseInt(expanded.slice(6, 8), 16) / 255 : 1
+    }
+  }
+
+  const rgb = value.match(/^rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:\s*[,/]\s*([\d.]+))?\s*\)$/i)
+  if (!rgb) return null
+
+  return {
+    red: Number(rgb[1]),
+    green: Number(rgb[2]),
+    blue: Number(rgb[3]),
+    alpha: rgb[4] === undefined ? 1 : Number(rgb[4])
+  }
+}
+
+function getCssEase(progress) {
+  const sample = (time, first, second) => 3 * (1 - time) ** 2 * time * first + 3 * (1 - time) * time ** 2 * second + time ** 3
+  let lower = 0
+  let upper = 1
+
+  for (let iteration = 0; iteration < 12; iteration += 1) {
+    const time = (lower + upper) / 2
+    if (sample(time, 0.25, 0.25) < progress) lower = time
+    else upper = time
+  }
+
+  return sample((lower + upper) / 2, 0.1, 1)
+}
+
+function animateThemeGridColor(fromColor, toColor) {
+  cancelAnimationFrame(themeGridAnimationFrame)
+  const from = parseColor(fromColor)
+  const to = parseColor(toColor)
+
+  if (!from || !to) {
+    performanceChart.options.scales.y.grid.color = toColor
+    performanceChart.update('none')
+    return
+  }
+
+  const start = performance.now()
+  const step = (now) => {
+    if (!performanceChart) return
+
+    const progress = Math.min((now - start) / THEME_TRANSITION_DURATION, 1)
+    const eased = getCssEase(progress)
+    const interpolate = (startValue, endValue) => startValue + (endValue - startValue) * eased
+    const red = Math.round(interpolate(from.red, to.red))
+    const green = Math.round(interpolate(from.green, to.green))
+    const blue = Math.round(interpolate(from.blue, to.blue))
+    const alpha = interpolate(from.alpha, to.alpha)
+
+    performanceChart.options.scales.y.grid.color = `rgba(${red}, ${green}, ${blue}, ${alpha})`
+    performanceChart.update('none')
+
+    if (progress < 1) themeGridAnimationFrame = requestAnimationFrame(step)
+    else performanceChart.options.scales.y.grid.color = toColor
+  }
+
+  themeGridAnimationFrame = requestAnimationFrame(step)
+}
+
 function externalTooltipHandler(context) {
   const { chart, tooltip } = context
   const parent = chart.canvas.parentNode
@@ -271,7 +345,14 @@ function getTicksLimit(period = selectedPeriod.value) {
   return period === 'year' ? 12 : period === 'threeMonths' ? 6 : period === 'month' ? 6 : 7
 }
 
-function getChartOptions(textColor, borderColor, currentData, range = getChartRange(), yRange = getYRange(selectedPeriod.value)) {
+function getChartOptions(
+  textColor,
+  borderColor,
+  currentData,
+  range = getChartRange(),
+  yRange = getYRange(selectedPeriod.value),
+  { themeTransition = false } = {}
+) {
   return {
     responsive: true,
     maintainAspectRatio: false,
@@ -281,8 +362,8 @@ function getChartOptions(textColor, borderColor, currentData, range = getChartRa
       }
     },
     animation: {
-      duration: 1200,
-      easing: 'easeInOutCubic'
+      duration: themeTransition ? THEME_TRANSITION_DURATION : 1200,
+      easing: themeTransition ? 'ease' : 'ease'
     },
     plugins: {
       legend: { display: false },
@@ -366,8 +447,8 @@ function renderPerformanceChart() {
   })
 }
 
-function updatePerformanceChart({ animate = true } = {}) {
-  nextTick(() => {
+function updatePerformanceChart({ animate = true, themeTransition = false, gridColor } = {}) {
+  const update = () => {
     if (!performanceChart) {
       renderPerformanceChart()
       return
@@ -375,7 +456,7 @@ function updatePerformanceChart({ animate = true } = {}) {
 
     const primaryColor = getCssColor('--p-primary-color', '#ec4899')
     const textColor = getCssColor('--p-text-muted-color', '#94a3b8')
-    const borderColor = getCssColor('--p-content-border-color', '#3a3a44')
+    const borderColor = gridColor || getCssColor('--p-content-border-color', '#3a3a44')
 
     performanceChart.data.datasets[0].data = getFullDataset()
     performanceChart.data.datasets[0].borderColor = primaryColor
@@ -389,10 +470,22 @@ function updatePerformanceChart({ animate = true } = {}) {
         min: performanceChart.options.scales.x.min,
         max: performanceChart.options.scales.x.max
       },
-      getYRange(selectedPeriod.value, selectedMetric.value)
+      getYRange(selectedPeriod.value, selectedMetric.value),
+      { themeTransition }
     )
-    performanceChart.update(animate ? 'active' : 'none')
-  })
+    // 'active' has a zero-duration transition for hover interactions. Theme
+    // changes must use Chart.js's normal animation mode instead.
+    performanceChart.update(themeTransition ? undefined : animate ? 'active' : 'none')
+  }
+
+  // Theme updates are already called from a synchronous watcher after the
+  // root class changes. Deferring them would make the canvas start one frame
+  // later than the CSS surfaces.
+  if (animate && !themeTransition) {
+    nextTick(update)
+  } else {
+    update()
+  }
 }
 
 function animatePeriodRange(period) {
@@ -462,6 +555,17 @@ function animatePeriodRange(period) {
 
 function animateMetricChange(metric, previousMetric) {
   if (!performanceChart || metric === previousMetric) return
+watch(selectedPeriod, (period) => animatePeriodRange(period))
+watch(selectedMetric, () => updatePerformanceChart({ animate: true }))
+watch(isDark, () => {
+  if (!performanceChart) return
+
+  const fromGridColor = performanceChart.options.scales.y.grid.color
+  const toGridColor = getCssColor('--p-content-border-color', '#3a3a44')
+  performanceChart.stop()
+  updatePerformanceChart({ animate: false, gridColor: fromGridColor })
+  animateThemeGridColor(fromGridColor, toGridColor)
+}, { flush: 'sync' })
 
   cancelAnimationFrame(metricAnimationFrame)
   const chart = performanceChart
@@ -507,21 +611,13 @@ watch(selectedPeriod, (period) => animatePeriodRange(period))
 watch(selectedMetric, (metric, previousMetric) => animateMetricChange(metric, previousMetric))
 onMounted(() => {
   renderPerformanceChart()
-
-  themeObserver = new MutationObserver(() => {
-    requestAnimationFrame(() => updatePerformanceChart({ animate: false }))
-  })
-  themeObserver.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['class']
-  })
 })
 
 onBeforeUnmount(() => {
-  themeObserver?.disconnect()
   cancelAnimationFrame(periodAnimationFrame)
   cancelAnimationFrame(metricAnimationFrame)
   if (crosshairRafId) cancelAnimationFrame(crosshairRafId)
+  cancelAnimationFrame(themeGridAnimationFrame)
   performanceChart?.destroy()
 })
 
@@ -540,15 +636,13 @@ const skillProfileRows = [
   { label: 'Stars', icon: Star, color: '#FBBF24', min: '—', max: '—', avg: '—' }
 ]
 
-// ÃÂ¡Ã‘â€šÃ‘â‚¬ÃÂ°ÃÂ½ÃÂ° — Ã‘â€žÃÂ»ÃÂ°ÃÂ³ ÃÂ»ÃÂµÃÂ¶ÃÂ¸Ã‘â€š ÃÂ² assets/countries/{code}.png, code — ÃÂºÃÂ¾Ã‘â‚¬ÃÂ¾Ã‘â€šÃÂºÃÂ¸ÃÂ¹ ÃÂºÃÂ¾ÃÂ´ Ã‘ÂÃ‘â€šÃ‘â‚¬ÃÂ°ÃÂ½Ã‘â€¹
+// Страна: флаг находится в assets/countries/{code}.png, где code — короткий код страны.
 const country = {
   code: 'ru',
   name: 'Russia'
 }
 
-// Ãâ€˜ÃÂµÃÂ¹ÃÂ´ÃÂ¶ÃÂ¸ — ÃÂ·ÃÂ°ÃÂ´ÃÂ°Ã‘â€˜ÃÂ¼ Ã‘â€šÃÂ¾ÃÂ»Ã‘Å’ÃÂºÃÂ¾ ÃÂ°ÃÂºÃ‘â€ ÃÂµÃÂ½Ã‘â€šÃÂ½Ã‘â€¹ÃÂ¹ Ã‘â€ ÃÂ²ÃÂµÃ‘â€š, Ã‘â€žÃÂ¾ÃÂ½ ÃÂ¸ Ã‘â‚¬ÃÂ°ÃÂ¼ÃÂºÃÂ° ÃÂ²Ã‘â€¹Ã‘â€¡ÃÂ¸Ã‘ÂÃÂ»Ã‘ÂÃ‘Å½Ã‘â€šÃ‘ÂÃ‘Â
-// ÃÂ°ÃÂ²Ã‘â€šÃÂ¾ÃÂ¼ÃÂ°Ã‘â€šÃÂ¸Ã‘â€¡ÃÂµÃ‘ÂÃÂºÃÂ¸ Ã‘â€¡ÃÂµÃ‘â‚¬ÃÂµÃÂ· color-mix() ÃÂ² CSS ÃÂ¾Ã‘â€š Ã‘â€šÃÂµÃÂºÃ‘Æ’Ã‘â€°ÃÂµÃÂ³ÃÂ¾ Ã‘â€ ÃÂ²ÃÂµÃ‘â€šÃÂ° ÃÂºÃÂ°Ã‘â‚¬Ã‘â€šÃÂ¾Ã‘â€¡ÃÂºÃÂ¸ —
-// ÃÂ° ÃÂ·ÃÂ½ÃÂ°Ã‘â€¡ÃÂ¸Ã‘â€š Ã‘ÂÃÂ°ÃÂ¼ÃÂ¸ ÃÂ¿ÃÂ¾ÃÂ´Ã‘ÂÃ‘â€šÃ‘â‚¬ÃÂ°ÃÂ¸ÃÂ²ÃÂ°Ã‘Å½Ã‘â€šÃ‘ÂÃ‘Â ÃÂ¿ÃÂ¾ÃÂ´ Ã‘ÂÃÂ²ÃÂµÃ‘â€šÃÂ»Ã‘Æ’Ã‘Å½/Ã‘â€šÃ‘â€˜ÃÂ¼ÃÂ½Ã‘Æ’Ã‘Å½ Ã‘â€šÃÂµÃÂ¼Ã‘Æ’.
+// Для бейджей задаётся только акцентный цвет, а фон и рамка автоматически подстраиваются под тему через color-mix() в CSS.
 const badges = [
   {
     label: 'Founder',
@@ -576,8 +670,8 @@ const badges = [
 
 <template>
   <div class="profile-page">
-    <!-- ÃÂ¨ÃÂ°ÃÂ¿ÃÂºÃÂ° ÃÂ¿Ã‘â‚¬ÃÂ¾Ã‘â€žÃÂ¸ÃÂ»Ã‘Â: ÃÂ°ÃÂ²ÃÂ°Ã‘â€šÃÂ°Ã‘â‚¬ + ÃÂ¼ÃÂµÃ‘â€šÃÂ° + Ã‘ÂÃ‘â€šÃÂ°Ã‘â€šÃ‘â€¹ -->
-    <section class="panel profile-header">
+    <!-- Шапка профиля: аватар, метаданные и статистика. -->
+    <section class="panel app-theme-surface profile-header">
       <div class="avatar-block">
         <div class="avatar-placeholder" />
       </div>
@@ -610,8 +704,8 @@ const badges = [
       </div>
     </section>
 
-    <!-- ÃÂ Ã‘ÂÃÂ´ 1: Skill Profile / Mod Performance / Info -->
-    <section class="panel panel-performance">
+    <!-- Ряд 1: Skill Profile, Mod Performance и Info. -->
+    <section class="panel app-theme-surface panel-performance">
       <div class="panel-heading panel-heading-with-controls">
         <h2 class="panel-title">Performance History</h2>
         <div class="performance-controls">
@@ -663,7 +757,7 @@ const badges = [
     </section>
 
     <section class="grid-row">
-      <div class="panel">
+      <div class="panel app-theme-surface">
         <h2 class="panel-title">Skill Profile</h2>
         <div class="skill-profile-table" role="table" aria-label="Skill profile">
           <div class="skill-profile-row skill-profile-header" role="row">
@@ -694,24 +788,24 @@ const badges = [
           </div>
         </div>
       </div>
-      <div class="panel">
+      <div class="panel app-theme-surface">
         <h2 class="panel-title">Tournament Duel Rating</h2>
         <div class="panel-placeholder" />
       </div>
     </section>
 
     <section class="grid-row">
-      <div class="panel">
+      <div class="panel app-theme-surface">
         <h2 class="panel-title">Skillset Profile</h2>
         <div class="panel-placeholder" />
       </div>
-      <div class="panel">
+      <div class="panel app-theme-surface">
         <h2 class="panel-title">Top Plays</h2>
         <div class="panel-placeholder" />
       </div>
     </section>
 
-    <section class="panel panel-tournament-experience">
+    <section class="panel app-theme-surface panel-tournament-experience">
       <h2 class="panel-title">Tournament Experience</h2>
       <div class="experience-placeholders">
         <div class="panel-placeholder" />
@@ -729,7 +823,6 @@ const badges = [
   gap: 24px;
 }
 
-/* ÃÅ¾ÃÂ±Ã‘â€°ÃÂ¸ÃÂ¹ Ã‘ÂÃ‘â€šÃÂ¸ÃÂ»Ã‘Å’ ÃÂºÃÂ°Ã‘â‚¬Ã‘â€šÃÂ¾Ã‘â€¡ÃÂºÃÂ¸ — Ã‘â€šÃÂ¾Ã‘â€š ÃÂ¶ÃÂµ Ã‘ÂÃÂ·Ã‘â€¹ÃÂº, Ã‘â€¡Ã‘â€šÃÂ¾ Ã‘Æ’ Ã‘ÂÃÂ°ÃÂ¹ÃÂ´ÃÂ±ÃÂ°Ã‘â‚¬ÃÂ° */
 .panel {
   background: var(--p-content-background);
   border: 1px solid var(--p-content-border-color);
@@ -784,7 +877,7 @@ const badges = [
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: color 160ms ease, background-color 160ms ease, transform 160ms ease;
+  transition: background-color 160ms ease, transform 160ms ease;
 }
 
 .metric-button:hover,
@@ -1048,7 +1141,6 @@ const badges = [
   flex: 0 0 auto;
 }
 
-/* ÃÂ¨ÃÂ°ÃÂ¿ÃÂºÃÂ° ÃÂ¿Ã‘â‚¬ÃÂ¾Ã‘â€žÃÂ¸ÃÂ»Ã‘Â */
 .profile-header {
   display: flex;
   align-items: center;
@@ -1155,7 +1247,6 @@ const badges = [
   min-height: 360px;
 }
 
-/* ÃÂ¡ÃÂµÃ‘â€šÃÂºÃÂ¸ Ã‘â‚¬Ã‘ÂÃÂ´ÃÂ¾ÃÂ² ÃÂºÃÂ°Ã‘â‚¬Ã‘â€šÃÂ¾Ã‘â€¡ÃÂµÃÂº — ÃÂ¿Ã‘â‚¬ÃÂ¾ÃÂ¿ÃÂ¾Ã‘â‚¬Ã‘â€ ÃÂ¸ÃÂ¸ Ã‘Ë†ÃÂ¸Ã‘â‚¬ÃÂ¸ÃÂ½ ÃÂ¿Ã‘â‚¬ÃÂ¸ÃÂ¼ÃÂµÃ‘â‚¬ÃÂ½ÃÂ¾ ÃÂºÃÂ°ÃÂº ÃÂ½ÃÂ° Ã‘â‚¬ÃÂµÃ‘â€žÃÂµÃ‘â‚¬ÃÂµÃÂ½Ã‘ÂÃÂµ */
 .grid-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
