@@ -99,6 +99,13 @@ html.app-theme-transition .app-sidebar .p-sidebar-aside {
   transition: border-color var(--app-theme-duration) var(--app-theme-easing) !important;
 }
 
+html.app-theme-transition .app-sidebar .app-sidebar-menu-button[data-active="true"] {
+  transition: background var(--app-theme-duration) var(--app-theme-easing),
+    color var(--app-theme-duration) var(--app-theme-easing),
+    border-color var(--app-theme-duration) var(--app-theme-easing),
+    box-shadow var(--app-theme-duration) var(--app-theme-easing) !important;
+}
+
 /* Theme-dependent details that paint independently of their parent surface.
    Keep this list explicit: applying transitions to the whole subtree causes
    expensive repaints and overrides PrimeVue's interaction animations. */

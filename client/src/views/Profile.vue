@@ -557,16 +557,6 @@ function animateMetricChange(metric, previousMetric) {
   if (!performanceChart || metric === previousMetric) return
 watch(selectedPeriod, (period) => animatePeriodRange(period))
 watch(selectedMetric, () => updatePerformanceChart({ animate: true }))
-watch(isDark, () => {
-  if (!performanceChart) return
-
-  const fromGridColor = performanceChart.options.scales.y.grid.color
-  const toGridColor = getCssColor('--p-content-border-color', '#3a3a44')
-  performanceChart.stop()
-  updatePerformanceChart({ animate: false, gridColor: fromGridColor })
-  animateThemeGridColor(fromGridColor, toGridColor)
-}, { flush: 'sync' })
-
   cancelAnimationFrame(metricAnimationFrame)
   const chart = performanceChart
   const dataset = chart.data.datasets[0]
@@ -609,6 +599,15 @@ watch(isDark, () => {
 
 watch(selectedPeriod, (period) => animatePeriodRange(period))
 watch(selectedMetric, (metric, previousMetric) => animateMetricChange(metric, previousMetric))
+watch(isDark, () => {
+  if (!performanceChart) return
+
+  const fromGridColor = performanceChart.options.scales.y.grid.color
+  const toGridColor = getCssColor('--p-content-border-color', '#3a3a44')
+  performanceChart.stop()
+  updatePerformanceChart({ animate: false, gridColor: fromGridColor })
+  animateThemeGridColor(fromGridColor, toGridColor)
+})
 onMounted(() => {
   renderPerformanceChart()
 })
