@@ -74,20 +74,48 @@ button, input, textarea, select { font: inherit; }
 
 /* The theme composable toggles this class on html. Only named painted
    surfaces animate; text, controls and canvas content switch immediately. */
+html.app-theme-transition body,
 html.app-theme-transition .app-theme-shell,
 html.app-theme-transition .app-shell-layout,
+html.app-theme-transition .app-shell-layout > .p-sidebar-main,
 html.app-theme-transition .app-page-content,
-html.app-theme-transition .app-sidebar,
-html.app-theme-transition .app-sidebar .p-sidebar-aside,
 html.app-theme-transition .app-sidebar .p-sidebar-panel,
-html.app-theme-transition .app-sidebar .p-sidebar-header,
-html.app-theme-transition .app-sidebar .p-sidebar-content,
-html.app-theme-transition .app-sidebar .p-sidebar-footer,
 html.app-theme-transition .app-user-menu,
 html.app-theme-transition .app-theme-surface {
   transition: background-color var(--app-theme-duration) var(--app-theme-easing),
     border-color var(--app-theme-duration) var(--app-theme-easing),
     box-shadow var(--app-theme-duration) var(--app-theme-easing) !important;
+}
+
+/* Keep the sidebar surface synchronized while its outer divider changes instantly. */
+html.app-theme-transition .app-sidebar .p-sidebar-panel {
+  transition-property: background-color, box-shadow !important;
+  transition-duration: var(--app-theme-duration) !important;
+  transition-timing-function: var(--app-theme-easing) !important;
+  transition-delay: 0ms !important;
+}
+
+html.app-theme-transition .app-sidebar .p-sidebar-aside {
+  transition: border-color var(--app-theme-duration) var(--app-theme-easing) !important;
+}
+
+/* Theme-dependent details that paint independently of their parent surface.
+   Keep this list explicit: applying transitions to the whole subtree causes
+   expensive repaints and overrides PrimeVue's interaction animations. */
+html.app-theme-transition .app-sidebar-profile-item::before,
+html.app-theme-transition .app-sidebar-avatar,
+html.app-theme-transition .panel-placeholder,
+html.app-theme-transition .skill-profile-row,
+html.app-theme-transition .stat-item,
+html.app-theme-transition .avatar-placeholder,
+html.app-theme-transition .metric-toggle,
+html.app-theme-transition .period-select,
+html.app-theme-transition .badge,
+html.app-theme-transition .performance-tooltip {
+  transition-property: background-color, color, border-color, box-shadow !important;
+  transition-duration: var(--app-theme-duration) !important;
+  transition-timing-function: var(--app-theme-easing) !important;
+  transition-delay: 0ms !important;
 }
 
 .app-shell-layout { min-height: 100dvh; }
@@ -112,7 +140,7 @@ html.app-theme-transition .app-theme-surface {
   flex: 0 0 var(--app-sidebar-width);
   transition: none;
 }
-.app-sidebar .p-sidebar-aside { position: fixed; inset: 0 auto 0 0; height: 100dvh; }
+.app-sidebar .p-sidebar-aside { position: fixed; inset: 0 auto 0 0; height: 100dvh; border-right-color: var(--p-content-border-color); transition: none; }
 .app-sidebar .p-sidebar-panel,
 .app-sidebar .p-sidebar-header,
 .app-sidebar .p-sidebar-content,
@@ -161,9 +189,9 @@ html.app-theme-transition .app-theme-surface {
 .app-toast .p-toast-summary { font-size: 0.95rem; font-weight: 700; }
 .app-toast .p-toast-detail { margin-top: 0.3rem; color: var(--p-text-muted-color); line-height: 1.45; }
 
-.app-user-menu-leave-active { transition: opacity 80ms ease, transform 80ms ease !important; }
+.app-user-menu-leave-active { transition: opacity 100ms ease, transform 100ms ease !important; }
 .app-user-menu-leave-from { opacity: 1; transform: translateY(0); }
-.app-user-menu-leave-to { opacity: 0; transform: translateY(-2px); }
+.app-user-menu-leave-to { opacity: 0; transform: translateY(2px); }
 .app-user-menu .p-menu-item-content,
 .app-user-menu .p-menu-item-link { min-height: var(--app-control-height); }
 .app-user-menu .p-menu-item-link { gap: var(--app-control-gap); padding-block: 0.75rem; font-size: 1.05rem; line-height: 1.25; color: var(--app-menu-text-light) !important; transition: color var(--app-theme-duration) ease, background-color var(--app-theme-duration) ease; }

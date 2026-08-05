@@ -129,7 +129,7 @@ watch(
                                 <SidebarMenuItem>
                                     <div class="app-sidebar-menu-button app-sidebar-header-button flex items-center gap-2">
                                         <div class="app-sidebar-logo-frame">
-                                            <img :src="logo" alt="Ð›Ð¾Ð³Ð¾Ñ‚Ð¸Ð¿" class="app-sidebar-logo" />
+                                            <img :src="logo" alt="logo" class="app-sidebar-logo" />
                                         </div>
                                     </div>
                                 </SidebarMenuItem>
