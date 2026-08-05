@@ -4,6 +4,7 @@ import { Chart, registerables } from 'chart.js'
 import { Crosshair, Gauge, Star, Target, Zap } from '@lucide/vue'
 import Select from 'primevue/select'
 import Badge from '../components/Badge.vue'
+import { THEME_TRANSITION_DURATION, useTheme } from '../composables/toggleTheme'
 
 Chart.register(...registerables)
 
@@ -11,8 +12,8 @@ const chartCanvas = ref(null)
 const selectedPeriod = ref('threeMonths')
 const selectedMetric = ref('pp')
 let performanceChart
-let themeObserver
 let isPeriodTransitioning = false
+const { isDark } = useTheme()
 
 const periodOptions = [
   { label: 'Last Week', value: 'week' },
@@ -29,6 +30,7 @@ const periodDays = {
 }
 
 let periodAnimationFrame
+let themeGridAnimationFrame
 
 const crosshairPlugin = {
   id: 'performanceCrosshair',
@@ -96,31 +98,84 @@ function createDailyChartData(days, basePp, baseRank) {
 }
 
 const masterChartData = createDailyChartData(periodDays.year, 520, 1240)
-const chartData = {
-  week: {
-    labels: masterChartData.labels.slice(-periodDays.week),
-    pp: masterChartData.pp.slice(-periodDays.week),
-    rank: masterChartData.rank.slice(-periodDays.week)
-  },
-  month: {
-    labels: masterChartData.labels.slice(-periodDays.month),
-    pp: masterChartData.pp.slice(-periodDays.month),
-    rank: masterChartData.rank.slice(-periodDays.month)
-  },
-  threeMonths: {
-    labels: masterChartData.labels.slice(-periodDays.threeMonths),
-    pp: masterChartData.pp.slice(-periodDays.threeMonths),
-    rank: masterChartData.rank.slice(-periodDays.threeMonths)
-  },
-  year: masterChartData
-}
-
 const activeChartData = computed(() => masterChartData)
 
 function getCssColor(variable, fallback) {
   return getComputedStyle(chartCanvas.value?.parentElement || document.body)
     .getPropertyValue(variable)
     .trim() || fallback
+}
+
+function parseColor(color) {
+  const value = color.trim()
+  const hex = value.match(/^#([\da-f]{3,8})$/i)?.[1]
+
+  if (hex) {
+    const expanded = hex.length <= 4 ? [...hex].map((character) => character.repeat(2)).join('') : hex
+    return {
+      red: Number.parseInt(expanded.slice(0, 2), 16),
+      green: Number.parseInt(expanded.slice(2, 4), 16),
+      blue: Number.parseInt(expanded.slice(4, 6), 16),
+      alpha: expanded.length === 8 ? Number.parseInt(expanded.slice(6, 8), 16) / 255 : 1
+    }
+  }
+
+  const rgb = value.match(/^rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:\s*[,/]\s*([\d.]+))?\s*\)$/i)
+  if (!rgb) return null
+
+  return {
+    red: Number(rgb[1]),
+    green: Number(rgb[2]),
+    blue: Number(rgb[3]),
+    alpha: rgb[4] === undefined ? 1 : Number(rgb[4])
+  }
+}
+
+function getCssEase(progress) {
+  const sample = (time, first, second) => 3 * (1 - time) ** 2 * time * first + 3 * (1 - time) * time ** 2 * second + time ** 3
+  let lower = 0
+  let upper = 1
+
+  for (let iteration = 0; iteration < 12; iteration += 1) {
+    const time = (lower + upper) / 2
+    if (sample(time, 0.25, 0.25) < progress) lower = time
+    else upper = time
+  }
+
+  return sample((lower + upper) / 2, 0.1, 1)
+}
+
+function animateThemeGridColor(fromColor, toColor) {
+  cancelAnimationFrame(themeGridAnimationFrame)
+  const from = parseColor(fromColor)
+  const to = parseColor(toColor)
+
+  if (!from || !to) {
+    performanceChart.options.scales.y.grid.color = toColor
+    performanceChart.update('none')
+    return
+  }
+
+  const start = performance.now()
+  const step = (now) => {
+    if (!performanceChart) return
+
+    const progress = Math.min((now - start) / THEME_TRANSITION_DURATION, 1)
+    const eased = getCssEase(progress)
+    const interpolate = (startValue, endValue) => startValue + (endValue - startValue) * eased
+    const red = Math.round(interpolate(from.red, to.red))
+    const green = Math.round(interpolate(from.green, to.green))
+    const blue = Math.round(interpolate(from.blue, to.blue))
+    const alpha = interpolate(from.alpha, to.alpha)
+
+    performanceChart.options.scales.y.grid.color = `rgba(${red}, ${green}, ${blue}, ${alpha})`
+    performanceChart.update('none')
+
+    if (progress < 1) themeGridAnimationFrame = requestAnimationFrame(step)
+    else performanceChart.options.scales.y.grid.color = toColor
+  }
+
+  themeGridAnimationFrame = requestAnimationFrame(step)
 }
 
 function externalTooltipHandler(context) {
@@ -191,7 +246,14 @@ function getTicksLimit(period = selectedPeriod.value) {
   return period === 'year' ? 12 : period === 'threeMonths' ? 6 : period === 'month' ? 6 : 7
 }
 
-function getChartOptions(textColor, borderColor, currentData, range = getChartRange(), yRange = getYRange(selectedPeriod.value)) {
+function getChartOptions(
+  textColor,
+  borderColor,
+  currentData,
+  range = getChartRange(),
+  yRange = getYRange(selectedPeriod.value),
+  { themeTransition = false } = {}
+) {
   return {
     responsive: true,
     maintainAspectRatio: false,
@@ -201,8 +263,8 @@ function getChartOptions(textColor, borderColor, currentData, range = getChartRa
       }
     },
     animation: {
-      duration: 1200,
-      easing: 'easeInOutCubic'
+      duration: themeTransition ? THEME_TRANSITION_DURATION : 1200,
+      easing: themeTransition ? 'ease' : 'ease'
     },
     plugins: {
       legend: { display: false },
@@ -282,8 +344,8 @@ function renderPerformanceChart() {
   })
 }
 
-function updatePerformanceChart({ animate = true } = {}) {
-  nextTick(() => {
+function updatePerformanceChart({ animate = true, themeTransition = false, gridColor } = {}) {
+  const update = () => {
     if (!performanceChart) {
       renderPerformanceChart()
       return
@@ -291,7 +353,7 @@ function updatePerformanceChart({ animate = true } = {}) {
 
     const primaryColor = getCssColor('--p-primary-color', '#ec4899')
     const textColor = getCssColor('--p-text-muted-color', '#94a3b8')
-    const borderColor = getCssColor('--p-content-border-color', '#3a3a44')
+    const borderColor = gridColor || getCssColor('--p-content-border-color', '#3a3a44')
 
     performanceChart.data.datasets[0].data = getFullDataset()
     performanceChart.data.datasets[0].borderColor = primaryColor
@@ -304,10 +366,22 @@ function updatePerformanceChart({ animate = true } = {}) {
         min: performanceChart.options.scales.x.min,
         max: performanceChart.options.scales.x.max
       },
-      getYRange(selectedPeriod.value, selectedMetric.value)
+      getYRange(selectedPeriod.value, selectedMetric.value),
+      { themeTransition }
     )
-    performanceChart.update(animate ? 'active' : 'none')
-  })
+    // 'active' has a zero-duration transition for hover interactions. Theme
+    // changes must use Chart.js's normal animation mode instead.
+    performanceChart.update(themeTransition ? undefined : animate ? 'active' : 'none')
+  }
+
+  // Theme updates are already called from a synchronous watcher after the
+  // root class changes. Deferring them would make the canvas start one frame
+  // later than the CSS surfaces.
+  if (animate && !themeTransition) {
+    nextTick(update)
+  } else {
+    update()
+  }
 }
 
 function animatePeriodRange(period) {
@@ -377,22 +451,23 @@ function animatePeriodRange(period) {
 
 watch(selectedPeriod, (period) => animatePeriodRange(period))
 watch(selectedMetric, () => updatePerformanceChart({ animate: true }))
+watch(isDark, () => {
+  if (!performanceChart) return
+
+  const fromGridColor = performanceChart.options.scales.y.grid.color
+  const toGridColor = getCssColor('--p-content-border-color', '#3a3a44')
+  performanceChart.stop()
+  updatePerformanceChart({ animate: false, gridColor: fromGridColor })
+  animateThemeGridColor(fromGridColor, toGridColor)
+}, { flush: 'sync' })
 
 onMounted(() => {
   renderPerformanceChart()
-
-  themeObserver = new MutationObserver(() => {
-    requestAnimationFrame(() => updatePerformanceChart({ animate: false }))
-  })
-  themeObserver.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['class']
-  })
 })
 
 onBeforeUnmount(() => {
-  themeObserver?.disconnect()
   cancelAnimationFrame(periodAnimationFrame)
+  cancelAnimationFrame(themeGridAnimationFrame)
   performanceChart?.destroy()
 })
 
@@ -411,15 +486,13 @@ const skillProfileRows = [
   { label: 'Stars', icon: Star, color: '#FBBF24', min: '—', max: '—', avg: '—' }
 ]
 
-// Ð¡Ñ‚Ñ€Ð°Ð½Ð° — Ñ„Ð»Ð°Ð³ Ð»ÐµÐ¶Ð¸Ñ‚ Ð² assets/countries/{code}.png, code — ÐºÐ¾Ñ€Ð¾Ñ‚ÐºÐ¸Ð¹ ÐºÐ¾Ð´ ÑÑ‚Ñ€Ð°Ð½Ñ‹
+// Страна: флаг находится в assets/countries/{code}.png, где code — короткий код страны.
 const country = {
   code: 'ru',
   name: 'Russia'
 }
 
-// Ð‘ÐµÐ¹Ð´Ð¶Ð¸ — Ð·Ð°Ð´Ð°Ñ‘Ð¼ Ñ‚Ð¾Ð»ÑŒÐºÐ¾ Ð°ÐºÑ†ÐµÐ½Ñ‚Ð½Ñ‹Ð¹ Ñ†Ð²ÐµÑ‚, Ñ„Ð¾Ð½ Ð¸ Ñ€Ð°Ð¼ÐºÐ° Ð²Ñ‹Ñ‡Ð¸ÑÐ»ÑÑŽÑ‚ÑÑ
-// Ð°Ð²Ñ‚Ð¾Ð¼Ð°Ñ‚Ð¸Ñ‡ÐµÑÐºÐ¸ Ñ‡ÐµÑ€ÐµÐ· color-mix() Ð² CSS Ð¾Ñ‚ Ñ‚ÐµÐºÑƒÑ‰ÐµÐ³Ð¾ Ñ†Ð²ÐµÑ‚Ð° ÐºÐ°Ñ€Ñ‚Ð¾Ñ‡ÐºÐ¸ —
-// Ð° Ð·Ð½Ð°Ñ‡Ð¸Ñ‚ ÑÐ°Ð¼Ð¸ Ð¿Ð¾Ð´ÑÑ‚Ñ€Ð°Ð¸Ð²Ð°ÑŽÑ‚ÑÑ Ð¿Ð¾Ð´ ÑÐ²ÐµÑ‚Ð»ÑƒÑŽ/Ñ‚Ñ‘Ð¼Ð½ÑƒÑŽ Ñ‚ÐµÐ¼Ñƒ.
+// Для бейджей задаётся только акцентный цвет, а фон и рамка автоматически подстраиваются под тему через color-mix() в CSS.
 const badges = [
   {
     label: 'Founder',
@@ -447,8 +520,8 @@ const badges = [
 
 <template>
   <div class="profile-page">
-    <!-- Ð¨Ð°Ð¿ÐºÐ° Ð¿Ñ€Ð¾Ñ„Ð¸Ð»Ñ: Ð°Ð²Ð°Ñ‚Ð°Ñ€ + Ð¼ÐµÑ‚Ð° + ÑÑ‚Ð°Ñ‚Ñ‹ -->
-    <section class="panel profile-header">
+    <!-- Шапка профиля: аватар, метаданные и статистика. -->
+    <section class="panel app-theme-surface profile-header">
       <div class="avatar-block">
         <div class="avatar-placeholder" />
       </div>
@@ -481,8 +554,8 @@ const badges = [
       </div>
     </section>
 
-    <!-- Ð ÑÐ´ 1: Skill Profile / Mod Performance / Info -->
-    <section class="panel panel-performance">
+    <!-- Ряд 1: Skill Profile, Mod Performance и Info. -->
+    <section class="panel app-theme-surface panel-performance">
       <div class="panel-heading panel-heading-with-controls">
         <h2 class="panel-title">Performance History</h2>
         <div class="performance-controls">
@@ -528,7 +601,7 @@ const badges = [
     </section>
 
     <section class="grid-row">
-      <div class="panel">
+      <div class="panel app-theme-surface">
         <h2 class="panel-title">Skill Profile</h2>
         <div class="skill-profile-table" role="table" aria-label="Skill profile">
           <div class="skill-profile-row skill-profile-header" role="row">
@@ -559,24 +632,24 @@ const badges = [
           </div>
         </div>
       </div>
-      <div class="panel">
+      <div class="panel app-theme-surface">
         <h2 class="panel-title">Tournament Duel Rating</h2>
         <div class="panel-placeholder" />
       </div>
     </section>
 
     <section class="grid-row">
-      <div class="panel">
+      <div class="panel app-theme-surface">
         <h2 class="panel-title">Skillset Profile</h2>
         <div class="panel-placeholder" />
       </div>
-      <div class="panel">
+      <div class="panel app-theme-surface">
         <h2 class="panel-title">Top Plays</h2>
         <div class="panel-placeholder" />
       </div>
     </section>
 
-    <section class="panel panel-tournament-experience">
+    <section class="panel app-theme-surface panel-tournament-experience">
       <h2 class="panel-title">Tournament Experience</h2>
       <div class="experience-placeholders">
         <div class="panel-placeholder" />
@@ -594,7 +667,6 @@ const badges = [
   gap: 24px;
 }
 
-/* ÐžÐ±Ñ‰Ð¸Ð¹ ÑÑ‚Ð¸Ð»ÑŒ ÐºÐ°Ñ€Ñ‚Ð¾Ñ‡ÐºÐ¸ — Ñ‚Ð¾Ñ‚ Ð¶Ðµ ÑÐ·Ñ‹Ðº, Ñ‡Ñ‚Ð¾ Ñƒ ÑÐ°Ð¹Ð´Ð±Ð°Ñ€Ð° */
 .panel {
   background: var(--p-content-background);
   border: 1px solid var(--p-content-border-color);
@@ -649,7 +721,7 @@ const badges = [
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: color 160ms ease, background-color 160ms ease, transform 160ms ease;
+  transition: background-color 160ms ease, transform 160ms ease;
 }
 
 .metric-button:hover,
@@ -866,7 +938,6 @@ const badges = [
   flex: 0 0 auto;
 }
 
-/* Ð¨Ð°Ð¿ÐºÐ° Ð¿Ñ€Ð¾Ñ„Ð¸Ð»Ñ */
 .profile-header {
   display: flex;
   align-items: center;
@@ -973,7 +1044,6 @@ const badges = [
   min-height: 360px;
 }
 
-/* Ð¡ÐµÑ‚ÐºÐ¸ Ñ€ÑÐ´Ð¾Ð² ÐºÐ°Ñ€Ñ‚Ð¾Ñ‡ÐµÐº — Ð¿Ñ€Ð¾Ð¿Ð¾Ñ€Ñ†Ð¸Ð¸ ÑˆÐ¸Ñ€Ð¸Ð½ Ð¿Ñ€Ð¸Ð¼ÐµÑ€Ð½Ð¾ ÐºÐ°Ðº Ð½Ð° Ñ€ÐµÑ„ÐµÑ€ÐµÐ½ÑÐµ */
 .grid-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
