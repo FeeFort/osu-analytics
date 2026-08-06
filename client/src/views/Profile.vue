@@ -2,6 +2,7 @@
 import { Crosshair, Gauge, Star, Target, Zap } from '@lucide/vue';
 import PerformanceChart from '../components/common/PerformanceChart.vue';
 import Panel from '../components/common/Panel.vue';
+import { DmtTeamIcon, FounderIcon } from '../components/icons';
 import ProfileHeader from '../components/profile/ProfileHeader.vue';
 import SkillProfileTable from '../components/profile/SkillProfileTable.vue';
 
@@ -50,27 +51,8 @@ const skillProfileRows = [
 
 const country = { code: 'ru', name: 'Russia' };
 const badges = [
-  {
-    label: 'Founder',
-    color: '#f8894d',
-    paths: [
-      'M8 13a4 4 0 1 0 8 0a4 4 0 1 0 -8 0',
-      'M8.5 10.5l-1 -2.5h-5.5l2.48 5.788a2 2 0 0 0 1.84 1.212h2.18',
-      'M15.5 10.5l1 -2.5h5.5l-2.48 5.788a2 2 0 0 1 -1.84 1.212h-2.18'
-    ]
-  },
-  {
-    label: 'DMT Team',
-    color: '#ac8bde',
-    paths: [
-      'M10 13a2 2 0 1 0 4 0a2 2 0 0 0 -4 0',
-      'M8 21v-1a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v1',
-      'M15 5a2 2 0 1 0 4 0a2 2 0 0 0 -4 0',
-      'M17 10h2a2 2 0 0 1 2 2v1',
-      'M5 5a2 2 0 1 0 4 0a2 2 0 0 0 -4 0',
-      'M3 13v-1a2 2 0 0 1 2 -2h2'
-    ]
-  }
+  { label: 'Founder', color: '#f8894d', icon: FounderIcon },
+  { label: 'DMT Team', color: '#ac8bde', icon: DmtTeamIcon }
 ];
 </script>
 

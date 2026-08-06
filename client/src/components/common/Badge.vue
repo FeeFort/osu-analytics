@@ -2,16 +2,14 @@
 defineProps({
   label: { type: String, required: true },
   color: { type: String, default: '#f8894d' },
-  paths: { type: Array, default: () => [] },
+  icon: { type: [Object, Function], default: null },
   reverse: { type: Boolean, default: false }
 });
 </script>
 
 <template>
   <span class="badge" :class="{ 'badge--reverse': reverse }" :style="{ '--badge-color': color }">
-    <svg class="badge-icon" viewBox="0 0 24 24" aria-hidden="true">
-      <path v-for="(path, index) in paths" :key="index" :d="path" />
-    </svg>
+    <component :is="icon" v-if="icon" class="badge-icon" aria-hidden="true" />
     <span class="badge-label">{{ label }}</span>
   </span>
 </template>
