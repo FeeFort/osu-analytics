@@ -31,7 +31,7 @@ import { useRouter, useRoute } from 'vue-router';
 import logoLight from './assets/logo-light.png';
 import logoDark from './assets/logo-dark.png';
 import { getErrorState, isPageErrorCode } from './error-config';
-import { useTheme } from './composables/toggleTheme';
+import { useTheme } from './composables/useTheme';
 
 const { isDark, toggleTheme: applyThemeToggle } = useTheme();
 const themeChangePending = ref(false);

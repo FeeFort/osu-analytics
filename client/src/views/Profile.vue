@@ -4,7 +4,7 @@ import { Chart, registerables } from 'chart.js'
 import { Crosshair, Gauge, Star, Target, Zap } from '@lucide/vue'
 import Select from 'primevue/select'
 import Badge from '../components/Badge.vue'
-import { THEME_TRANSITION_DURATION, useTheme } from '../composables/toggleTheme'
+import { THEME_TRANSITION_DURATION, useTheme } from '../composables/useTheme'
 
 Chart.register(...registerables)
 
