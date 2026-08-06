@@ -3,16 +3,12 @@ defineProps({
   label: { type: String, required: true },
   color: { type: String, default: '#f8894d' },
   paths: { type: Array, default: () => [] },
-  reverse: { type: Boolean, default: false },
-})
+  reverse: { type: Boolean, default: false }
+});
 </script>
 
 <template>
-  <span
-    class="badge"
-    :class="{ 'badge--reverse': reverse }"
-    :style="{ '--badge-color': color }"
-  >
+  <span class="badge" :class="{ 'badge--reverse': reverse }" :style="{ '--badge-color': color }">
     <svg class="badge-icon" viewBox="0 0 24 24" aria-hidden="true">
       <path v-for="(path, index) in paths" :key="index" :d="path" />
     </svg>
@@ -57,4 +53,3 @@ defineProps({
   stroke-linejoin: round;
 }
 </style>
-

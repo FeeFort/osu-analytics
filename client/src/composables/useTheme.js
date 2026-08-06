@@ -10,33 +10,33 @@ let transitionTimeout;
 let transitionFrame;
 
 function setTheme(useDarkTheme) {
-    const nextIsDark = Boolean(useDarkTheme);
+  const nextIsDark = Boolean(useDarkTheme);
 
-    clearTimeout(transitionTimeout);
-    cancelAnimationFrame(transitionFrame);
+  clearTimeout(transitionTimeout);
+  cancelAnimationFrame(transitionFrame);
 
-    // Enable transition rules before updating the PrimeVue selector.
-    rootElement.classList.add(THEME_TRANSITION_CLASS);
-    void rootElement.offsetWidth;
+  // Enable transition rules before updating the PrimeVue selector.
+  rootElement.classList.add(THEME_TRANSITION_CLASS);
+  void rootElement.offsetWidth;
 
-    transitionFrame = requestAnimationFrame(() => {
-        rootElement.classList.toggle(DARK_THEME_CLASS, nextIsDark);
-        isDark.value = nextIsDark;
-        // Keep rules briefly to commit the final interpolated paint.
-        transitionTimeout = window.setTimeout(() => {
-            rootElement.classList.remove(THEME_TRANSITION_CLASS);
-        }, THEME_TRANSITION_DURATION + THEME_TRANSITION_CLEANUP_BUFFER);
-    });
+  transitionFrame = requestAnimationFrame(() => {
+    rootElement.classList.toggle(DARK_THEME_CLASS, nextIsDark);
+    isDark.value = nextIsDark;
+    // Keep rules briefly to commit the final interpolated paint.
+    transitionTimeout = window.setTimeout(() => {
+      rootElement.classList.remove(THEME_TRANSITION_CLASS);
+    }, THEME_TRANSITION_DURATION + THEME_TRANSITION_CLEANUP_BUFFER);
+  });
 }
 
 function toggleTheme() {
-    setTheme(!isDark.value);
+  setTheme(!isDark.value);
 }
 
 export function useTheme() {
-    return {
-        isDark: readonly(isDark),
-        setTheme,
-        toggleTheme
-    };
+  return {
+    isDark: readonly(isDark),
+    setTheme,
+    toggleTheme
+  };
 }

@@ -1,6 +1,6 @@
 <script setup>
-defineOptions({ inheritAttrs: false })
-defineProps({ title: { type: String, default: '' } })
+defineOptions({ inheritAttrs: false });
+defineProps({ title: { type: String, default: '' } });
 </script>
 
 <template>
@@ -39,4 +39,3 @@ defineProps({ title: { type: String, default: '' } })
   border: 1px dashed var(--p-content-border-color);
 }
 </style>
-

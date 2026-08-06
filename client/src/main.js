@@ -1,25 +1,25 @@
-import { createApp } from 'vue'
-import App from './App.vue'
-import PrimeVue from 'primevue/config'
-import ToastService from 'primevue/toastservice'
-import MyPreset from './theme.js'
-import router from './router'
-import '@primeuix/styles'
-import './style.css'
+import { createApp } from 'vue';
+import App from './App.vue';
+import PrimeVue from 'primevue/config';
+import ToastService from 'primevue/toastservice';
+import MyPreset from './theme.js';
+import router from './router';
+import '@primeuix/styles';
+import './style.css';
 
-const app = createApp(App)
+const app = createApp(App);
 
 app.use(PrimeVue, {
-    theme: {
-        preset: MyPreset,
-        options: {
-            darkModeSelector: '.app-dark'
-        }
-    },
-    license: import.meta.env.VITE_PRIMEUI_LICENSE_KEY
-})
+  theme: {
+    preset: MyPreset,
+    options: {
+      darkModeSelector: '.app-dark'
+    }
+  },
+  license: import.meta.env.VITE_PRIMEUI_LICENSE_KEY
+});
 
-app.use(ToastService)
-app.use(router)
+app.use(ToastService);
+app.use(router);
 
-app.mount('#app')
+app.mount('#app');

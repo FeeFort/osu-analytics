@@ -1,7 +1,7 @@
 <script setup>
 defineProps({
-  rows: { type: Array, required: true },
-})
+  rows: { type: Array, required: true }
+});
 </script>
 
 <template>
@@ -43,7 +43,7 @@ defineProps({
 
 .skill-profile-row {
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) repeat(3, minmax(42px, .7fr));
+  grid-template-columns: minmax(0, 1.5fr) repeat(3, minmax(42px, 0.7fr));
   align-items: center;
   min-height: 48px;
   border-bottom: 1px solid color-mix(in srgb, var(--p-content-border-color) 45%, transparent);
@@ -82,4 +82,3 @@ defineProps({
   flex: 0 0 auto;
 }
 </style>
-

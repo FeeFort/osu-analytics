@@ -1,12 +1,12 @@
 <script setup>
-import Badge from '../common/Badge.vue'
+import Badge from '../common/Badge.vue';
 
 defineProps({
-  country: Object,
-  badges: Array,
-  stats: Array,
-  playerName: { type: String, default: 'Player Name' },
-})
+  country: { type: Object, required: true },
+  badges: { type: Array, required: true },
+  stats: { type: Array, required: true },
+  playerName: { type: String, default: 'Player Name' }
+});
 </script>
 
 <template>
@@ -150,4 +150,3 @@ defineProps({
   }
 }
 </style>
-

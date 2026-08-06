@@ -1,33 +1,33 @@
 <script setup>
-import { computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { ArrowLeft, RefreshCw } from '@lucide/vue'
-import errorGirl from '../assets/error-girl.png'
-import errorSmile from '../assets/error-smile.svg'
-import { getErrorState } from '../error-config'
+import { computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { ArrowLeft, RefreshCw } from '@lucide/vue';
+import errorGirl from '../assets/error-girl.png';
+import errorSmile from '../assets/error-smile.svg';
+import { getErrorState } from '../error-config';
 
-const route = useRoute()
-const router = useRouter()
+const route = useRoute();
+const router = useRouter();
 
-const code = computed(() => route.params.code)
-const content = computed(() => getErrorState(code.value))
+const code = computed(() => route.params.code);
+const content = computed(() => getErrorState(code.value));
 
 function goHome() {
-  router.push('/')
+  router.push('/');
 }
 
 function retry() {
-  const target = typeof route.query.from === 'string' ? route.query.from : '/'
-  router.replace(target === route.fullPath ? '/' : target)
+  const target = typeof route.query.from === 'string' ? route.query.from : '/';
+  router.replace(target === route.fullPath ? '/' : target);
 }
 
 function runAction() {
   if (content.value.action === 'retry') {
-    retry()
-    return
+    retry();
+    return;
   }
 
-  goHome()
+  goHome();
 }
 </script>
 
@@ -60,8 +60,7 @@ function runAction() {
   padding: 28px;
   color: #f8f7fb;
   background:
-    radial-gradient(ellipse 40% 26% at 50% 32%, rgba(236, 72, 153, .08), transparent 65%),
-    #0c0b12;
+    radial-gradient(ellipse 40% 26% at 50% 32%, rgba(236, 72, 153, 0.08), transparent 65%), #0c0b12;
 }
 
 .error-content {
@@ -87,9 +86,11 @@ function runAction() {
   color: #ed3f9e;
   font-size: clamp(148px, 21vw, 236px);
   font-weight: 900;
-  letter-spacing: -.12em;
-  line-height: .8;
-  text-shadow: 0 0 12px rgba(236, 72, 153, .78), 0 0 50px rgba(236, 72, 153, .3);
+  letter-spacing: -0.12em;
+  line-height: 0.8;
+  text-shadow:
+    0 0 12px rgba(236, 72, 153, 0.78),
+    0 0 50px rgba(236, 72, 153, 0.3);
 }
 
 .error-girl {
@@ -99,7 +100,7 @@ function runAction() {
   left: 50%;
   width: min(80%, 430px);
   transform: translateX(-43%);
-  filter: drop-shadow(0 14px 24px rgba(236, 72, 153, .2));
+  filter: drop-shadow(0 14px 24px rgba(236, 72, 153, 0.2));
 }
 
 .error-smile {
@@ -109,7 +110,7 @@ function runAction() {
   left: 90%;
   width: clamp(86px, 9vw, 108px);
   transform: translateX(-50%);
-  filter: drop-shadow(0 0 12px rgba(255, 114, 204, .7));
+  filter: drop-shadow(0 0 12px rgba(255, 114, 204, 0.7));
 }
 
 h1 {
@@ -134,22 +135,44 @@ p {
   border-radius: 6px;
   padding: 11px 17px;
   background: #ec4899;
-  box-shadow: 0 10px 24px rgba(236, 72, 153, .25);
+  box-shadow: 0 10px 24px rgba(236, 72, 153, 0.25);
   color: #fff;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color .18s ease, transform .18s ease;
+  transition:
+    background-color 0.18s ease,
+    transform 0.18s ease;
 }
 
-.error-action:hover { background: #db2777; transform: translateY(-2px); }
-.error-action:focus-visible { outline: 3px solid rgba(244, 114, 182, .7); outline-offset: 3px; }
+.error-action:hover {
+  background: #db2777;
+  transform: translateY(-2px);
+}
+.error-action:focus-visible {
+  outline: 3px solid rgba(244, 114, 182, 0.7);
+  outline-offset: 3px;
+}
 
 @media (max-width: 560px) {
-  .error-page { padding: 24px 16px; }
-  .error-art { height: 223px; }
-  .error-number { top: 27px; font-size: 148px; }
-  .error-girl { width: 88%; transform: translateX(-43%); }
-  .error-smile { top: -10px; left: 91%; width: 74px; }
+  .error-page {
+    padding: 24px 16px;
+  }
+  .error-art {
+    height: 223px;
+  }
+  .error-number {
+    top: 27px;
+    font-size: 148px;
+  }
+  .error-girl {
+    width: 88%;
+    transform: translateX(-43%);
+  }
+  .error-smile {
+    top: -10px;
+    left: 91%;
+    width: 74px;
+  }
 }
 </style>

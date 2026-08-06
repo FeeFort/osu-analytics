@@ -24,25 +24,68 @@ const router = useRouter();
 const { isDark } = useTheme();
 const logo = computed(() => (isDark.value ? logoDark : logoLight));
 const navGroups = [
-    { label: 'Navigation', items: [{ label: 'Search', icon: Search, path: '/search', exact: true }, { label: 'News', icon: Newspaper, path: '/news', exact: true }] },
-    { label: 'Analytics', items: [{ label: 'Compare', icon: Scale, path: '/compare', exact: false }] }
+  {
+    label: 'Navigation',
+    items: [
+      { label: 'Search', icon: Search, path: '/search', exact: true },
+      { label: 'News', icon: Newspaper, path: '/news', exact: true }
+    ]
+  },
+  {
+    label: 'Analytics',
+    items: [{ label: 'Compare', icon: Scale, path: '/compare', exact: false }]
+  }
 ];
-function isActive(item) { return item.exact ? route.path === item.path : route.path.startsWith(item.path); }
-function navigate(item) { if (item.path !== '/search') router.push(item.path); }
+function isActive(item) {
+  return item.exact ? route.path === item.path : route.path.startsWith(item.path);
+}
+function navigate(item) {
+  if (item.path !== '/search') router.push(item.path);
+}
 </script>
 
 <template>
-    <Sidebar id="menu-demo" class="app-sidebar" width="20rem" collapsible="none">
-        <SidebarSpacer />
-        <SidebarAside><SidebarPanel>
-            <SidebarHeader><SidebarMenu><SidebarMenuItem><div class="app-sidebar-menu-button app-sidebar-header-button flex items-center gap-2"><div class="app-sidebar-logo-frame"><img :src="logo" alt="logo" class="app-sidebar-logo" /></div></div></SidebarMenuItem></SidebarMenu></SidebarHeader>
-            <SidebarContent>
-                <SidebarGroup v-for="group in navGroups" :key="group.label">
-                    <SidebarGroupLabel class="app-sidebar-group-label">{{ group.label }}</SidebarGroupLabel>
-                    <SidebarGroupContent><SidebarMenu><SidebarMenuItem v-for="item in group.items" :key="item.path"><SidebarMenuButton class="app-sidebar-menu-button" :isActive="isActive(item)" @click="navigate(item)"><component :is="item.icon" class="app-sidebar-menu-icon" /><span>{{ item.label }}</span></SidebarMenuButton></SidebarMenuItem></SidebarMenu></SidebarGroupContent>
-                </SidebarGroup>
-            </SidebarContent>
-            <SidebarFooter><SidebarMenu><SidebarMenuItem><SidebarMenuButton class="app-sidebar-menu-button app-sidebar-about-button"><Info class="app-sidebar-menu-icon" /><span>About</span></SidebarMenuButton></SidebarMenuItem><slot name="user-menu" /></SidebarMenu></SidebarFooter>
-        </SidebarPanel></SidebarAside>
-    </Sidebar>
+  <Sidebar id="menu-demo" class="app-sidebar" width="20rem" collapsible="none">
+    <SidebarSpacer />
+    <SidebarAside
+      ><SidebarPanel>
+        <SidebarHeader
+          ><SidebarMenu
+            ><SidebarMenuItem
+              ><div
+                class="app-sidebar-menu-button app-sidebar-header-button flex items-center gap-2"
+              >
+                <div class="app-sidebar-logo-frame">
+                  <img :src="logo" alt="logo" class="app-sidebar-logo" />
+                </div></div></SidebarMenuItem></SidebarMenu
+        ></SidebarHeader>
+        <SidebarContent>
+          <SidebarGroup v-for="group in navGroups" :key="group.label">
+            <SidebarGroupLabel class="app-sidebar-group-label">{{ group.label }}</SidebarGroupLabel>
+            <SidebarGroupContent
+              ><SidebarMenu
+                ><SidebarMenuItem v-for="item in group.items" :key="item.path"
+                  ><SidebarMenuButton
+                    class="app-sidebar-menu-button"
+                    :isActive="isActive(item)"
+                    @click="navigate(item)"
+                    ><component :is="item.icon" class="app-sidebar-menu-icon" /><span>{{
+                      item.label
+                    }}</span></SidebarMenuButton
+                  ></SidebarMenuItem
+                ></SidebarMenu
+              ></SidebarGroupContent
+            >
+          </SidebarGroup>
+        </SidebarContent>
+        <SidebarFooter
+          ><SidebarMenu
+            ><SidebarMenuItem
+              ><SidebarMenuButton class="app-sidebar-menu-button app-sidebar-about-button"
+                ><Info class="app-sidebar-menu-icon" /><span>About</span></SidebarMenuButton
+              ></SidebarMenuItem
+            ><slot name="user-menu" /></SidebarMenu
+        ></SidebarFooter> </SidebarPanel
+    ></SidebarAside>
+  </Sidebar>
 </template>
