@@ -72,8 +72,7 @@ button, input, textarea, select { font: inherit; }
 #app > * { display: flex; width: 100%; min-width: 0; min-height: 100dvh; flex: 1 1 auto; }
 #app > * > * { width: 100%; max-width: none; min-width: 0; }
 
-/* The theme composable toggles this class on html. Only named painted
-   surfaces animate; text, controls and canvas content switch immediately. */
+/* Animate only named painted surfaces during theme changes. */
 html.app-theme-transition body,
 html.app-theme-transition .app-theme-shell,
 html.app-theme-transition .app-shell-layout,
@@ -106,9 +105,7 @@ html.app-theme-transition .app-sidebar .app-sidebar-menu-button[data-active="tru
     box-shadow var(--app-theme-duration) var(--app-theme-easing) !important;
 }
 
-/* Theme-dependent details that paint independently of their parent surface.
-   Keep this list explicit: applying transitions to the whole subtree causes
-   expensive repaints and overrides PrimeVue's interaction animations. */
+/* Explicitly transition details that paint outside their parent surfaces. */
 html.app-theme-transition .app-sidebar-profile-item::before,
 html.app-theme-transition .app-sidebar-avatar,
 html.app-theme-transition .panel-placeholder,
@@ -130,8 +127,7 @@ html.app-theme-transition .performance-tooltip {
 .app-page-content { display: flex; min-width: 0; min-height: 100%; flex: 1; flex-direction: column; padding: 1rem; overflow: auto; }
 .app-page-content--error { min-height: 100dvh; padding: 0; overflow: hidden; }
 
-/* Fixed sidebar: PrimeVue's `collapsible="none"` is reinforced here so no
-   responsive or icon-mode rule can change its geometry. */
+/* Keep the sidebar geometry fixed in every mode. */
 .app-sidebar {
   --sidebar-width: var(--app-sidebar-width);
   --sidebar-width-icon: var(--app-sidebar-width);

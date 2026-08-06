@@ -58,8 +58,7 @@ const userMenuItems = computed(() => [
 ]);
 
 function toggleTheme() {
-    // The popup is closed by PrimeVue immediately after this command. The
-    // palette changes in its after-leave hook, once it is no longer visible.
+    // Apply the palette after the PrimeVue popup finishes closing.
     themeChangePending.value = true;
 }
 

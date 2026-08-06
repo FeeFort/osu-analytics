@@ -4,7 +4,7 @@ import vue from '@vitejs/plugin-vue'
 export default defineConfig({
   plugins: [vue()],
   server: {
-    // Позволяет Vite принимать подключения при активном VPN.
+    // Allow Vite connections while a VPN is active.
     host: '0.0.0.0',
     port: 5173,
     strictPort: true,

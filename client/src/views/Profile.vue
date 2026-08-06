@@ -32,13 +32,7 @@ const periodDays = {
 let periodAnimationFrame
 let metricAnimationFrame
 
-// Chart.js redraws the crosshair via afterDraw on every hover/mousemove
-// event using the raw, instant coordinates of the active point - there's
-// no built-in tweening for custom plugins, so without this the line/ring
-// snaps between points instantly even though the HTML tooltip box glides.
-// We keep a small lerp loop that chases the target position and drives
-// its own chart.draw() calls, independent of Chart.js's own animation
-// system, so the ring/line motion matches the div tooltip's CSS transition.
+// Smooth the custom Chart.js crosshair independently of tooltip animation.
 let crosshairCurrent = null
 let crosshairTarget = null
 let crosshairRafId = null
@@ -312,11 +306,7 @@ function externalTooltipHandler(context) {
       <span style="color: ${changeColor};">${formattedChange}</span>
     </span>
   `
-  // Position via transform (compositor-only, avoids left/top layout
-  // thrashing) but set the resolved value directly rather than through
-  // CSS custom properties: unregistered custom props don't interpolate
-  // on transition (they jump discretely), which silently killed the
-  // animation even though transition-property: transform was declared.
+  // Use inline transforms to avoid layout thrashing and discrete custom-property transitions.
   tooltipElement.style.opacity = '1'
   tooltipElement.style.transform = `translate3d(calc(${tooltip.caretX}px - 50%), calc(${tooltip.caretY}px - 100% - 12px), 0)`
 }
@@ -473,14 +463,11 @@ function updatePerformanceChart({ animate = true, themeTransition = false, gridC
       getYRange(selectedPeriod.value, selectedMetric.value),
       { themeTransition }
     )
-    // 'active' has a zero-duration transition for hover interactions. Theme
-    // changes must use Chart.js's normal animation mode instead.
+    // Use normal Chart.js animation for theme changes.
     performanceChart.update(themeTransition ? undefined : animate ? 'active' : 'none')
   }
 
-  // Theme updates are already called from a synchronous watcher after the
-  // root class changes. Deferring them would make the canvas start one frame
-  // later than the CSS surfaces.
+  // Update synchronously so the canvas matches CSS surfaces.
   if (animate && !themeTransition) {
     nextTick(update)
   } else {
@@ -555,8 +542,6 @@ function animatePeriodRange(period) {
 
 function animateMetricChange(metric, previousMetric) {
   if (!performanceChart || metric === previousMetric) return
-watch(selectedPeriod, (period) => animatePeriodRange(period))
-watch(selectedMetric, () => updatePerformanceChart({ animate: true }))
   cancelAnimationFrame(metricAnimationFrame)
   const chart = performanceChart
   const dataset = chart.data.datasets[0]
@@ -635,13 +620,13 @@ const skillProfileRows = [
   { label: 'Stars', icon: Star, color: '#FBBF24', min: '—', max: '—', avg: '—' }
 ]
 
-// Страна: флаг находится в assets/countries/{code}.png, где code — короткий код страны.
+// Country flags are stored in assets/countries/{code}.png.
 const country = {
   code: 'ru',
   name: 'Russia'
 }
 
-// Для бейджей задаётся только акцентный цвет, а фон и рамка автоматически подстраиваются под тему через color-mix() в CSS.
+// Badge backgrounds and borders adapt through CSS color-mix().
 const badges = [
   {
     label: 'Founder',
@@ -669,7 +654,7 @@ const badges = [
 
 <template>
   <div class="profile-page">
-    <!-- Шапка профиля: аватар, метаданные и статистика. -->
+    <!-- Profile header with avatar, metadata, and statistics. -->
     <section class="panel app-theme-surface profile-header">
       <div class="avatar-block">
         <div class="avatar-placeholder" />
@@ -703,7 +688,7 @@ const badges = [
       </div>
     </section>
 
-    <!-- Ряд 1: Skill Profile, Mod Performance и Info. -->
+    <!-- First row: Skill Profile, Mod Performance, and Info. -->
     <section class="panel app-theme-surface panel-performance">
       <div class="panel-heading panel-heading-with-controls">
         <h2 class="panel-title">Performance History</h2>
@@ -1006,19 +991,7 @@ const badges = [
   left: 0;
   top: 0;
   transform: translate3d(calc(0px - 50%), calc(0px - 100% - 12px), 0);
-  /* #app's global theme-transition rule targets every element via
-     :where(*), which has zero specificity, so that rule's real
-     specificity is just #app (an ID). A plain .performance-tooltip
-     class selector loses to that on transition-property even with
-     !important on both sides (id beats class when importance ties) -
-     that's why transform was silently dropped from the animated
-     properties. Prefixing with #app matches its specificity so ours
-     wins. transform (not left/top) so this stays compositor-only and
-     doesn't get dropped frames from layout thrashing under frequent
-     updates. The actual translate values are set inline from JS on
-     every update - do not route them through CSS custom properties
-     here, they won't interpolate on transition unless registered via
-     @property. */
+  /* Match global selector specificity to preserve compositor-only tooltip transforms. */
   transition-property: opacity, transform !important;
   transition-duration: 120ms, 260ms !important;
   transition-timing-function: ease, ease-out !important;

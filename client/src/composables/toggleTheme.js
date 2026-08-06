@@ -15,16 +15,14 @@ function setTheme(useDarkTheme) {
     clearTimeout(transitionTimeout);
     cancelAnimationFrame(transitionFrame);
 
-    // Commit the transition rules first. The following frame then changes the
-    // PrimeVue selector so every large surface starts the same transition.
+    // Enable transition rules before updating the PrimeVue selector.
     rootElement.classList.add(THEME_TRANSITION_CLASS);
     void rootElement.offsetWidth;
 
     transitionFrame = requestAnimationFrame(() => {
         rootElement.classList.toggle(DARK_THEME_CLASS, nextIsDark);
         isDark.value = nextIsDark;
-        // Keep the rules for two extra frames so the final interpolated paint
-        // is committed before the temporary class disappears.
+        // Keep rules briefly to commit the final interpolated paint.
         transitionTimeout = window.setTimeout(() => {
             rootElement.classList.remove(THEME_TRANSITION_CLASS);
         }, THEME_TRANSITION_DURATION + THEME_TRANSITION_CLEANUP_BUFFER);
