@@ -93,23 +93,23 @@ const badges = [
 .profile-page {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 1.5rem;
 }
 .grid-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 24px;
+  gap: 1.5rem;
 }
 .panel-tournament-experience {
-  min-height: 390px;
+  min-height: 24.375rem;
 }
 :global(.experience-placeholders) {
   display: grid;
   grid-template-columns: 0.8fr 1.4fr 1fr;
-  gap: 16px;
+  gap: 1rem;
 }
 :global(.experience-placeholders .panel-placeholder) {
-  min-height: 250px;
+  min-height: 15.625rem;
 }
 @media (max-width: 900px) {
   .grid-row {

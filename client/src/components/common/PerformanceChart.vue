@@ -63,12 +63,12 @@ const {
 .panel {
   background: var(--p-content-background);
   border: 1px solid var(--p-content-border-color);
-  border-radius: 14px;
-  padding: 24px;
+  border-radius: 0.875rem;
+  padding: 1.5rem;
 }
 .panel-title {
-  margin: 0 0 20px;
-  font-size: 17px;
+  margin: 0 0 1.25rem;
+  font-size: 1.063rem;
   font-weight: 600;
   color: var(--p-text-color);
 }
@@ -76,42 +76,42 @@ const {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
+  gap: 1rem;
 }
 .panel-heading {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
+  gap: 1rem;
 }
 .performance-controls {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem;
 }
 .metric-button {
-  height: 32px;
+  height: 2rem;
   border: 1px solid var(--p-content-border-color);
-  border-radius: 7px;
+  border-radius: 0.438rem;
   color: var(--p-text-color);
   background: var(--p-content-background);
   font: inherit;
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 .metric-toggle {
   display: flex;
-  gap: 4px;
-  padding: 4px;
+  gap: 0.25rem;
+  padding: 0.25rem;
   border: 1px solid var(--p-content-border-color);
-  border-radius: 10px;
+  border-radius: 0.625rem;
 }
 .metric-button {
-  height: 34px;
-  min-width: 64px;
-  padding: 0 16px;
+  height: 2.125rem;
+  min-width: 4rem;
+  padding: 0 1rem;
   border-color: transparent;
-  border-radius: 7px;
-  font-size: 14px;
+  border-radius: 0.438rem;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
   transition:
@@ -124,41 +124,41 @@ const {
   background: var(--p-primary-color);
 }
 :deep(.period-select) {
-  width: 190px;
-  min-height: 42px;
-  border-radius: 9px;
+  width: 11.875rem;
+  min-height: 2.625rem;
+  border-radius: 0.563rem;
   transition:
     border-color 160ms ease,
     box-shadow 160ms ease;
 }
 :deep(.period-select .p-select-label) {
-  padding: 10px 12px;
-  font-size: 14px;
+  padding: 0.625rem 0.75rem;
+  font-size: 0.875rem;
 }
 :deep(.period-select .p-select-dropdown) {
-  width: 38px;
+  width: 2.375rem;
 }
 :deep(.p-select-overlay) {
-  border-radius: 9px;
+  border-radius: 0.563rem;
   overflow: hidden;
 }
 :deep(.p-select-option) {
-  padding: 10px 12px;
+  padding: 0.625rem 0.75rem;
   transition:
     background-color 140ms ease,
     color 140ms ease;
 }
 .panel-performance {
-  min-height: 480px;
+  min-height: 30rem;
 }
 .panel-performance .panel-placeholder {
-  min-height: 360px;
+  min-height: 22.5rem;
 }
 .performance-content {
   display: grid;
-  grid-template-columns: 180px minmax(0, 1fr);
-  gap: 24px;
-  height: 360px;
+  grid-template-columns: 11.25rem minmax(0, 1fr);
+  gap: 1.5rem;
+  height: 22.5rem;
 }
 .performance-metrics {
   display: grid;
@@ -169,26 +169,26 @@ const {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 8px;
-  min-width: 220px;
-  padding: 24px 12px 24px 24px;
+  gap: 0.5rem;
+  min-width: 13.75rem;
+  padding: 1.5rem 0.75rem 1.5rem 1.5rem;
 }
 .performance-metric-label {
-  font-size: 13px;
+  font-size: 0.813rem;
   color: var(--p-text-muted-color);
 }
 .performance-metric-value {
   display: inline-flex;
   align-items: baseline;
-  gap: 6px;
-  min-width: 220px;
+  gap: 0.375rem;
+  min-width: 13.75rem;
   white-space: nowrap;
-  font-size: 30px;
+  font-size: 1.875rem;
   font-weight: 700;
   color: var(--p-text-color);
 }
 .performance-metric-delta {
-  font-size: 13px;
+  font-size: 0.813rem;
   font-weight: 500;
   color: var(--p-text-muted-color);
   white-space: nowrap;
@@ -206,9 +206,9 @@ const {
   position: relative;
   min-height: 0;
   height: 100%;
-  width: calc(100% - 128px);
-  margin-left: 64px;
-  transform: translateX(64px);
+  width: calc(100% - 8rem);
+  margin-left: 4rem;
+  transform: translateX(4rem);
 }
 .performance-chart-placeholder canvas {
   width: 100% !important;
@@ -218,10 +218,10 @@ const {
 :global(#app .performance-tooltip) {
   position: absolute;
   z-index: 2;
-  min-width: 118px;
-  padding: 10px 12px;
+  min-width: 7.375rem;
+  padding: 0.625rem 0.75rem;
   border: 1px solid color-mix(in srgb, var(--p-content-border-color) 70%, transparent);
-  border-radius: 6px;
+  border-radius: 0.375rem;
   background: color-mix(in srgb, var(--p-content-background) 90%, transparent);
   box-shadow: 0 8px 22px rgb(0 0 0 / 18%);
   color: var(--p-text-color);
@@ -229,7 +229,7 @@ const {
   opacity: 0;
   left: 0;
   top: 0;
-  transform: translate3d(calc(0px - 50%), calc(0px - 100% - 12px), 0);
+  transform: translate3d(calc(0px - 50%), calc(0px - 100% - 0.75rem), 0);
   transition-property: opacity, transform !important;
   transition-duration: 120ms, 260ms !important;
   transition-timing-function: ease, ease-out !important;
@@ -243,19 +243,19 @@ const {
   white-space: nowrap;
 }
 :global(.performance-tooltip-date) {
-  margin-bottom: 5px;
-  font-size: 10px;
+  margin-bottom: 0.313rem;
+  font-size: 0.625rem;
   color: var(--p-text-muted-color);
 }
 :global(.performance-tooltip-value) {
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 :global(.performance-tooltip-change) {
   display: flex;
-  gap: 5px;
-  margin-top: 4px;
-  font-size: 12px;
+  gap: 0.313rem;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 :global(.performance-tooltip-change-label) {

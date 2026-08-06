@@ -57,14 +57,14 @@ function runAction() {
   min-height: 100svh;
   place-items: center;
   overflow: hidden;
-  padding: 28px;
+  padding: 1.75rem;
   color: #f8f7fb;
   background: radial-gradient(ellipse 40% 26% at 50% 32%, rgba(236, 72, 153, 0.08), transparent 65%), #0c0b12;
 }
 
 .error-content {
   display: flex;
-  width: min(100%, 620px);
+  width: min(100%, 38.75rem);
   flex-direction: column;
   align-items: center;
   text-align: center;
@@ -72,18 +72,18 @@ function runAction() {
 
 .error-art {
   position: relative;
-  width: min(100%, 560px);
-  height: clamp(248px, 29vw, 316px);
-  margin-bottom: 8px;
+  width: min(100%, 35rem);
+  height: clamp(15.5rem, 29vw, 19.75rem);
+  margin-bottom: 0.5rem;
 }
 
 .error-number {
   position: absolute;
-  inset: 18px 50% auto auto;
+  inset: 1.125rem 50% auto auto;
   width: 100%;
   transform: translateX(50%);
   color: #ed3f9e;
-  font-size: clamp(148px, 21vw, 236px);
+  font-size: clamp(9.25rem, 21vw, 14.75rem);
   font-weight: 900;
   letter-spacing: -0.12em;
   line-height: 0.8;
@@ -95,9 +95,9 @@ function runAction() {
 .error-girl {
   position: absolute;
   z-index: 1;
-  bottom: -33px;
+  bottom: -2.063rem;
   left: 50%;
-  width: min(80%, 430px);
+  width: min(80%, 26.875rem);
   transform: translateX(-43%);
   filter: drop-shadow(0 14px 24px rgba(236, 72, 153, 0.2));
 }
@@ -105,38 +105,38 @@ function runAction() {
 .error-smile {
   position: absolute;
   z-index: 2;
-  top: -15px;
+  top: -0.938rem;
   left: 90%;
-  width: clamp(86px, 9vw, 108px);
+  width: clamp(5.375rem, 9vw, 6.75rem);
   transform: translateX(-50%);
   filter: drop-shadow(0 0 12px rgba(255, 114, 204, 0.7));
 }
 
 h1 {
   margin: 0;
-  font-size: clamp(28px, 3vw, 34px);
+  font-size: clamp(1.75rem, 3vw, 2.125rem);
   line-height: 1.15;
 }
 
 p {
-  max-width: 500px;
-  margin: 13px auto 22px;
+  max-width: 31.25rem;
+  margin: 0.813rem auto 1.375rem;
   color: #b4b0bf;
-  font-size: 15px;
+  font-size: 0.938rem;
   line-height: 1.55;
 }
 
 .error-action {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem;
   border: 0;
-  border-radius: 6px;
-  padding: 11px 17px;
+  border-radius: 0.375rem;
+  padding: 0.688rem 1.063rem;
   background: #ec4899;
   box-shadow: 0 10px 24px rgba(236, 72, 153, 0.25);
   color: #fff;
-  font-size: 13px;
+  font-size: 0.813rem;
   font-weight: 600;
   cursor: pointer;
   transition:
@@ -146,32 +146,32 @@ p {
 
 .error-action:hover {
   background: #db2777;
-  transform: translateY(-2px);
+  transform: translateY(-0.125rem);
 }
 .error-action:focus-visible {
-  outline: 3px solid rgba(244, 114, 182, 0.7);
-  outline-offset: 3px;
+  outline: 0.188rem solid rgba(244, 114, 182, 0.7);
+  outline-offset: 0.188rem;
 }
 
 @media (max-width: 560px) {
   .error-page {
-    padding: 24px 16px;
+    padding: 1.5rem 1rem;
   }
   .error-art {
-    height: 223px;
+    height: 13.938rem;
   }
   .error-number {
-    top: 27px;
-    font-size: 148px;
+    top: 1.688rem;
+    font-size: 9.25rem;
   }
   .error-girl {
     width: 88%;
     transform: translateX(-43%);
   }
   .error-smile {
-    top: -10px;
+    top: -0.625rem;
     left: 91%;
-    width: 74px;
+    width: 4.625rem;
   }
 }
 </style>

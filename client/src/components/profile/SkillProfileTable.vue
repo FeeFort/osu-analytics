@@ -29,25 +29,25 @@ defineProps({
   display: flex;
   flex-direction: column;
   gap: 0;
-  width: min(100%, 420px);
+  width: min(100%, 26.25rem);
   min-height: 0;
   color: var(--p-text-muted-color);
-  font-size: 15px;
+  font-size: 0.938rem;
 }
 
 .skill-profile-row {
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) repeat(3, minmax(42px, 0.7fr));
+  grid-template-columns: minmax(0, 1.5fr) repeat(3, minmax(2.625rem, 0.7fr));
   align-items: center;
-  min-height: 48px;
+  min-height: 3rem;
   border-bottom: 1px solid color-mix(in srgb, var(--p-content-border-color) 45%, transparent);
 }
 
 .skill-profile-header {
-  min-height: 34px;
+  min-height: 2.125rem;
   border-bottom: 0;
   color: var(--p-text-muted-color);
-  font-size: 13px;
+  font-size: 0.813rem;
   text-align: right;
 }
 
@@ -66,7 +66,7 @@ defineProps({
 .skill-profile-name {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem;
   color: var(--p-text-color);
   font-weight: 600;
   text-align: left !important;

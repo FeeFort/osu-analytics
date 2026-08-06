@@ -40,16 +40,16 @@ defineProps({
 .profile-header {
   display: flex;
   align-items: center;
-  gap: 32px;
-  padding: 24px 32px;
+  gap: 2rem;
+  padding: 1.5rem 2rem;
 }
 
 .avatar-placeholder {
-  width: 160px;
-  height: 160px;
+  width: 10rem;
+  height: 10rem;
   border-radius: 50%;
   background: var(--p-content-hover-background);
-  border: 3px solid var(--p-primary-color);
+  border: 0.188rem solid var(--p-primary-color);
   flex: 0 0 auto;
 }
 
@@ -58,12 +58,12 @@ defineProps({
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 0.875rem;
 }
 
 .player-name {
   margin: 0;
-  font-size: 40px;
+  font-size: 2.5rem;
   font-weight: 800;
   color: var(--p-text-color);
 }
@@ -71,45 +71,45 @@ defineProps({
 .badges-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 0.5rem;
   align-items: center;
 }
 
 .country-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: -6px;
+  gap: 0.5rem;
+  margin-top: -0.375rem;
 }
 
 .country-flag {
-  width: 26px;
-  height: 18px;
+  width: 1.625rem;
+  height: 1.125rem;
   object-fit: cover;
-  border-radius: 3px;
+  border-radius: 0.188rem;
   display: block;
   flex: 0 0 auto;
 }
 
 .country-name {
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 500;
   color: var(--p-text-color);
 }
 
 .stats-block {
   display: flex;
-  gap: 32px;
+  gap: 2rem;
   flex: 0 0 auto;
-  padding-right: 24px;
+  padding-right: 1.5rem;
 }
 
 .stat-item {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 0.313rem;
   align-items: flex-start;
-  padding-left: 28px;
+  padding-left: 1.75rem;
   border-left: 1px solid var(--p-content-border-color);
 }
 
@@ -119,18 +119,18 @@ defineProps({
 }
 
 .stat-value {
-  font-size: 32px;
+  font-size: 2rem;
   font-weight: 700;
   color: var(--p-text-color);
 }
 
 .stat-label {
-  font-size: 13px;
+  font-size: 0.813rem;
   color: var(--p-text-muted-color);
 }
 
 .stat-sub {
-  font-size: 11px;
+  font-size: 0.688rem;
   color: var(--p-text-muted-color);
 }
 

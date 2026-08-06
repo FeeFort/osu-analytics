@@ -14,27 +14,27 @@ defineProps({ title: { type: String, default: '' } });
 .panel {
   background: var(--p-content-background);
   border: 1px solid var(--p-content-border-color);
-  border-radius: 14px;
-  padding: 24px;
+  border-radius: 0.875rem;
+  padding: 1.5rem;
 }
 
 .panel-heading {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
+  gap: 1rem;
 }
 
 .panel-title {
-  margin: 0 0 20px;
-  font-size: 17px;
+  margin: 0 0 1.25rem;
+  font-size: 1.063rem;
   font-weight: 600;
   color: var(--p-text-color);
 }
 
 :global(.panel-placeholder) {
-  min-height: 280px;
-  border-radius: 10px;
+  min-height: 17.5rem;
+  border-radius: 0.625rem;
   background: var(--p-content-hover-background);
   border: 1px dashed var(--p-content-border-color);
 }

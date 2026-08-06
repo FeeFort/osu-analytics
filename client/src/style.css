@@ -65,6 +65,7 @@ body,
 
 html {
   background: var(--app-background);
+  font-size: 75%;
 }
 
 body {
@@ -299,7 +300,7 @@ html.app-theme-transition .performance-tooltip {
 }
 .app-toast .p-toast-message {
   border: 1px solid color-mix(in srgb, var(--p-content-border-color) 70%, transparent);
-  border-radius: 14px;
+  border-radius: 0.875rem;
   background: color-mix(in srgb, var(--p-content-background) 92%, transparent);
   box-shadow: 0 18px 42px rgb(0 0 0 / 16%);
   backdrop-filter: blur(14px);
@@ -328,7 +329,7 @@ html.app-theme-transition .performance-tooltip {
 }
 .app-user-menu-leave-to {
   opacity: 0;
-  transform: translateY(2px);
+  transform: translateY(0.125rem);
 }
 .app-user-menu .p-menu-item-content,
 .app-user-menu .p-menu-item-link {
