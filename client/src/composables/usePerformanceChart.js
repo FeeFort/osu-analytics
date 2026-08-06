@@ -1,12 +1,7 @@
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { Chart, registerables } from 'chart.js';
 import { THEME_TRANSITION_DURATION, useTheme } from './useTheme';
-import {
-  createExternalTooltipHandler,
-  getCssColor,
-  getCssEase,
-  parseColor
-} from '../utils/chartTooltip';
+import { createExternalTooltipHandler, getCssColor, getCssEase, parseColor } from '../utils/chartTooltip';
 import { createCrosshairPlugin } from '../utils/chartCrosshairPlugin';
 
 Chart.register(...registerables);
@@ -68,10 +63,7 @@ export function usePerformanceChart() {
   const ppDelta = masterChartData.pp.at(-1) - masterChartData.pp.at(-2);
   const rankDelta = (masterChartData.rank.at(-1) - masterChartData.rank.at(-2)) * 1000;
   const activeChartData = () => masterChartData;
-  const externalTooltipHandler = createExternalTooltipHandler(
-    activeChartData,
-    () => selectedMetric.value
-  );
+  const externalTooltipHandler = createExternalTooltipHandler(activeChartData, () => selectedMetric.value);
   const crosshairPlugin = createCrosshairPlugin(
     () => isPeriodTransitioning,
     (variable, fallback) => getCssColor(variable, fallback, chartCanvas)
@@ -107,9 +99,7 @@ export function usePerformanceChart() {
   }
 
   function getYRange(period, metric = selectedMetric.value) {
-    const values = masterChartData[metric]
-      .slice(-periodDays[period])
-      .map((value) => toPlotValue(metric, value));
+    const values = masterChartData[metric].slice(-periodDays[period]).map((value) => toPlotValue(metric, value));
     const min = Math.min(...values);
     const max = Math.max(...values);
     const padding = (max - min || Math.max(Math.abs(max) * 0.1, 1)) * 0.1;
@@ -156,11 +146,7 @@ export function usePerformanceChart() {
           grid: { display: false },
           ticks: {
             color: textColor,
-            callback: (value) =>
-              masterChartData.labels[Math.round(Number(value) + periodDays.year - 1)]?.replace(
-                /, \d{4}$/,
-                ''
-              ) || value,
+            callback: (value) => masterChartData.labels[Math.round(Number(value) + periodDays.year - 1)]?.replace(/, \d{4}$/, '') || value,
             autoSkip: true,
             maxTicksLimit: getTicksLimit(),
             maxRotation: 0
@@ -211,8 +197,7 @@ export function usePerformanceChart() {
       if (!performanceChart) return renderPerformanceChart();
       const primaryColor = getCssColor('--p-primary-color', '#ec4899', chartCanvas);
       const textColor = getCssColor('--p-text-muted-color', '#94a3b8', chartCanvas);
-      const borderColor =
-        gridColor || getCssColor('--p-content-border-color', '#3a3a44', chartCanvas);
+      const borderColor = gridColor || getCssColor('--p-content-border-color', '#3a3a44', chartCanvas);
       performanceChart.data.datasets[0].data = getFullDataset();
       performanceChart.data.datasets[0].borderColor = primaryColor;
       performanceChart.data.datasets[0].backgroundColor = `${primaryColor}22`;
@@ -249,18 +234,10 @@ export function usePerformanceChart() {
     const liveYScale = performanceChart.scales.y;
     const target = getChartRange(period);
     const targetY = getYRange(period, selectedMetric.value);
-    const fromMin = Number.isFinite(Number(scaleOptions.min))
-      ? Number(scaleOptions.min)
-      : liveScale.min;
-    const fromMax = Number.isFinite(Number(scaleOptions.max))
-      ? Number(scaleOptions.max)
-      : liveScale.max;
-    const fromYMin = Number.isFinite(Number(yScaleOptions.min))
-      ? Number(yScaleOptions.min)
-      : liveYScale.min;
-    const fromYMax = Number.isFinite(Number(yScaleOptions.max))
-      ? Number(yScaleOptions.max)
-      : liveYScale.max;
+    const fromMin = Number.isFinite(Number(scaleOptions.min)) ? Number(scaleOptions.min) : liveScale.min;
+    const fromMax = Number.isFinite(Number(scaleOptions.max)) ? Number(scaleOptions.max) : liveScale.max;
+    const fromYMin = Number.isFinite(Number(yScaleOptions.min)) ? Number(yScaleOptions.min) : liveYScale.min;
+    const fromYMax = Number.isFinite(Number(yScaleOptions.max)) ? Number(yScaleOptions.max) : liveYScale.max;
     yScaleOptions.min = fromYMin;
     yScaleOptions.max = fromYMax;
     scaleOptions.ticks.maxTicksLimit = getTicksLimit(period);
@@ -277,13 +254,7 @@ export function usePerformanceChart() {
       if (progress < 1) periodAnimationFrame = requestAnimationFrame(step);
       else {
         isPeriodTransitioning = false;
-        performanceChart.options.events = [
-          'mousemove',
-          'mouseout',
-          'click',
-          'touchstart',
-          'touchmove'
-        ];
+        performanceChart.options.events = ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove'];
         performanceChart.update('none');
       }
     };

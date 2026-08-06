@@ -59,8 +59,7 @@ function runAction() {
   overflow: hidden;
   padding: 28px;
   color: #f8f7fb;
-  background:
-    radial-gradient(ellipse 40% 26% at 50% 32%, rgba(236, 72, 153, 0.08), transparent 65%), #0c0b12;
+  background: radial-gradient(ellipse 40% 26% at 50% 32%, rgba(236, 72, 153, 0.08), transparent 65%), #0c0b12;
 }
 
 .error-content {

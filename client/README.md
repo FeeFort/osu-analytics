@@ -12,16 +12,9 @@ ESLint and Prettier were added and configured. Please, run commands `npm run lin
 
 Custom icons should go into `src/components/icons`, each as a separate `.vue` file:
 
-``` html
+```html
 <template>
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    stroke-width="2"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  >
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <!-- paths go here -->
   </svg>
 </template>
@@ -29,12 +22,12 @@ Custom icons should go into `src/components/icons`, each as a separate `.vue` fi
 
 Then the new icon should be added into the `src/components/icons/index.js` as in the example:
 
-``` js
+```js
 export { default as DmtTeamIcon } from './DmtTeamIcon.vue';
 ```
 
 Afterwards custom icons can be imported for use just like icons from the libraries, for example:
 
-``` js
+```js
 import { DmtTeamIcon, FounderIcon } from '../components/icons';
 ```

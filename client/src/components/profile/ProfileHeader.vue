@@ -19,11 +19,7 @@ defineProps({
         <h1 class="player-name">{{ playerName }}</h1>
       </div>
       <div class="country-row">
-        <img
-          class="country-flag"
-          :src="`./src/assets/countries/${country.code}.png`"
-          :alt="country.name"
-        />
+        <img class="country-flag" :src="`./src/assets/countries/${country.code}.png`" :alt="country.name" />
         <span class="country-name">{{ country.name }}</span>
       </div>
       <div class="badges-row">

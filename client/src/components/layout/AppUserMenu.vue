@@ -47,19 +47,11 @@ function applyPendingThemeChange() {
       class="app-sidebar-menu-button app-sidebar-header-button"
       @click="(e) => userMenu.toggle(e)"
       aria-haspopup="true"
-      aria-controls="user_menu"
-    >
+      aria-controls="user_menu">
       <Avatar label="JD" shape="circle" class="app-sidebar-avatar shrink-0" />
       <span>John Doe</span>
       <ChevronDown class="app-sidebar-profile-chevron" />
     </SidebarMenuButton>
-    <Menu
-      ref="userMenu"
-      id="user_menu"
-      class="app-user-menu"
-      :model="userMenuItems"
-      :popup="true"
-      :pt="{ transition: userMenuTransition }"
-    />
+    <Menu ref="userMenu" id="user_menu" class="app-user-menu" :model="userMenuItems" :popup="true" :pt="{ transition: userMenuTransition }" />
   </SidebarMenuItem>
 </template>

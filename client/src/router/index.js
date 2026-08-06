@@ -51,8 +51,7 @@ const router = createRouter({
 
 router.beforeEach((to) => {
   if (to.name === 'error' && isToastErrorCode(to.params.code)) {
-    const fromPath =
-      typeof to.query.from === 'string' && to.query.from !== to.fullPath ? to.query.from : '/';
+    const fromPath = typeof to.query.from === 'string' && to.query.from !== to.fullPath ? to.query.from : '/';
     const resolved = router.resolve(fromPath);
 
     return {

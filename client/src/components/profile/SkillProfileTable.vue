@@ -14,13 +14,7 @@ defineProps({
     </div>
     <div v-for="skill in rows" :key="skill.label" class="skill-profile-row" role="row">
       <span class="skill-profile-name" role="rowheader">
-        <component
-          :is="skill.icon"
-          :size="18"
-          :stroke-width="2"
-          :style="{ color: skill.color }"
-          aria-hidden="true"
-        />
+        <component :is="skill.icon" :size="18" :stroke-width="2" :style="{ color: skill.color }" aria-hidden="true" />
         {{ skill.label }}
       </span>
       <span role="cell">{{ skill.min }}</span>

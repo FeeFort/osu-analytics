@@ -28,23 +28,10 @@ const {
           optionLabel="label"
           optionValue="value"
           class="period-select"
-          aria-label="Chart period"
-        />
+          aria-label="Chart period" />
         <div class="metric-toggle">
-          <button
-            class="metric-button"
-            :class="{ 'metric-button-active': selectedMetric === 'pp' }"
-            @click="selectedMetric = 'pp'"
-          >
-            PP
-          </button>
-          <button
-            class="metric-button"
-            :class="{ 'metric-button-active': selectedMetric === 'rank' }"
-            @click="selectedMetric = 'rank'"
-          >
-            Rank
-          </button>
+          <button class="metric-button" :class="{ 'metric-button-active': selectedMetric === 'pp' }" @click="selectedMetric = 'pp'">PP</button>
+          <button class="metric-button" :class="{ 'metric-button-active': selectedMetric === 'rank' }" @click="selectedMetric = 'rank'">Rank</button>
         </div>
       </div>
     </div>
@@ -52,21 +39,17 @@ const {
       <div class="performance-metrics">
         <div class="performance-metric">
           <span class="performance-metric-label">Current PP</span>
-          <strong class="performance-metric-value"
-            >{{ formatMetricNumber(currentPp) }}
-            <small class="performance-metric-delta" :class="deltaClass(ppDelta)"
-              >({{ formatDelta(ppDelta) }})</small
-            ></strong
-          >
+          <strong class="performance-metric-value">
+            {{ formatMetricNumber(currentPp) }}
+            <small class="performance-metric-delta" :class="deltaClass(ppDelta)">({{ formatDelta(ppDelta) }})</small>
+          </strong>
         </div>
         <div class="performance-metric">
           <span class="performance-metric-label">Global Rank</span>
-          <strong class="performance-metric-value"
-            >#{{ formatMetricNumber(currentRank) }}
-            <small class="performance-metric-delta" :class="deltaClass(rankDelta)"
-              >({{ formatDelta(rankDelta) }})</small
-            ></strong
-          >
+          <strong class="performance-metric-value">
+            #{{ formatMetricNumber(currentRank) }}
+            <small class="performance-metric-delta" :class="deltaClass(rankDelta)">({{ formatDelta(rankDelta) }})</small>
+          </strong>
         </div>
       </div>
       <div class="performance-chart-placeholder">

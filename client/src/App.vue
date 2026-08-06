@@ -12,9 +12,7 @@ import AppUserMenu from './components/layout/AppUserMenu.vue';
 const router = useRouter();
 const route = useRoute();
 const isErrorRoute = computed(() => route.meta.isErrorPage === true);
-const shouldUseFullPageError = computed(
-  () => isErrorRoute.value && isPageErrorCode(route.params.code)
-);
+const shouldUseFullPageError = computed(() => isErrorRoute.value && isPageErrorCode(route.params.code));
 const toast = useToast();
 const handledToastKey = ref('');
 
@@ -60,10 +58,7 @@ watch(
     <router-view />
   </main>
 
-  <div
-    v-else
-    class="app-theme-shell app-theme-surface border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden"
-  >
+  <div v-else class="app-theme-shell app-theme-surface border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden">
     <SidebarLayout class="app-shell-layout min-h-192! relative!">
       <AppSidebar>
         <template #user-menu><AppUserMenu /></template>

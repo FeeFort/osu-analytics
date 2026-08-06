@@ -8,8 +8,7 @@ export function parseColor(color) {
   const hex = value.match(/^#([\da-f]{3,8})$/i)?.[1];
 
   if (hex) {
-    const expanded =
-      hex.length <= 4 ? [...hex].map((character) => character.repeat(2)).join('') : hex;
+    const expanded = hex.length <= 4 ? [...hex].map((character) => character.repeat(2)).join('') : hex;
 
     return {
       red: Number.parseInt(expanded.slice(0, 2), 16),
@@ -19,9 +18,7 @@ export function parseColor(color) {
     };
   }
 
-  const rgb = value.match(
-    /^rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:\s*[,/]\s*([\d.]+))?\s*\)$/i
-  );
+  const rgb = value.match(/^rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:\s*[,/]\s*([\d.]+))?\s*\)$/i);
 
   if (!rgb) return null;
 
@@ -34,8 +31,7 @@ export function parseColor(color) {
 }
 
 export function getCssEase(progress) {
-  const sample = (time, first, second) =>
-    3 * (1 - time) ** 2 * time * first + 3 * (1 - time) * time ** 2 * second + time ** 3;
+  const sample = (time, first, second) => 3 * (1 - time) ** 2 * time * first + 3 * (1 - time) * time ** 2 * second + time ** 3;
   let lower = 0;
   let upper = 1;
 
