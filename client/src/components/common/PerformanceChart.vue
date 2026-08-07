@@ -15,7 +15,7 @@ const {
   rankDelta,
   rankDeltaMagnitude,
   rankImproved,
-  formatMetricNumber,
+  formatMetricNumber
 } = usePerformanceChart();
 </script>
 
@@ -45,8 +45,7 @@ const {
           :delta="ppDelta"
           :icon="Activity"
           :positive="ppDelta > 0"
-          :negative="ppDelta < 0"
-        />
+          :negative="ppDelta < 0" />
         <PerformanceMetricCard
           label="Global Rank"
           :value="`#${formatMetricNumber(currentRank)}`"
@@ -54,8 +53,7 @@ const {
           variant="arrow"
           :icon="Trophy"
           :positive="rankImproved"
-          :negative="!rankImproved && rankDelta !== 0"
-        />
+          :negative="!rankImproved && rankDelta !== 0" />
       </div>
       <div class="performance-chart-placeholder">
         <canvas ref="chartCanvas" />

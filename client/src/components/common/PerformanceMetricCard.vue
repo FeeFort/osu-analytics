@@ -35,10 +35,7 @@ const formattedDelta = computed(() => Math.abs(props.delta).toLocaleString('en-U
       <span class="performance-metric-icon">
         <component :is="icon" :size="19" :stroke-width="2" aria-hidden="true" />
       </span>
-      <span
-        class="metric-delta"
-        :class="isPositive ? 'metric-delta--up' : isNegative ? 'metric-delta--down' : 'metric-delta--flat'"
-      >
+      <span class="metric-delta" :class="isPositive ? 'metric-delta--up' : isNegative ? 'metric-delta--down' : 'metric-delta--flat'">
         <component :is="deltaIcon" :size="14" :stroke-width="2.5" aria-hidden="true" />
         <span>{{ formattedDelta }}</span>
       </span>
@@ -61,7 +58,10 @@ const formattedDelta = computed(() => Math.abs(props.delta).toLocaleString('en-U
   background: var(--p-content-hover-background);
 }
 
-.performance-metric-copy { align-self: flex-start; min-width: 0; }
+.performance-metric-copy {
+  align-self: flex-start;
+  min-width: 0;
+}
 .performance-metric-label {
   display: block;
   margin-bottom: 0.35rem;
@@ -115,10 +115,27 @@ const formattedDelta = computed(() => Math.abs(props.delta).toLocaleString('en-U
   line-height: 1;
   white-space: nowrap;
 }
-.metric-delta > span { transform: translateY(1px); }
-.metric-delta--up { color: #16a34a; background: color-mix(in srgb, #16a34a 18%, transparent); }
-.metric-delta--down { color: #dc2626; background: color-mix(in srgb, #dc2626 16%, transparent); }
-.metric-delta--flat { color: var(--p-text-muted-color); background: color-mix(in srgb, var(--p-text-muted-color) 12%, transparent); }
-:global(.app-dark) .metric-delta--up { color: #4ade80; background: color-mix(in srgb, #4ade80 16%, transparent); }
-:global(.app-dark) .metric-delta--down { color: #f87171; background: color-mix(in srgb, #f87171 15%, transparent); }
+.metric-delta > span {
+  transform: translateY(1px);
+}
+.metric-delta--up {
+  color: #16a34a;
+  background: color-mix(in srgb, #16a34a 18%, transparent);
+}
+.metric-delta--down {
+  color: #dc2626;
+  background: color-mix(in srgb, #dc2626 16%, transparent);
+}
+.metric-delta--flat {
+  color: var(--p-text-muted-color);
+  background: color-mix(in srgb, var(--p-text-muted-color) 12%, transparent);
+}
+:global(.app-dark) .metric-delta--up {
+  color: #4ade80;
+  background: color-mix(in srgb, #4ade80 16%, transparent);
+}
+:global(.app-dark) .metric-delta--down {
+  color: #f87171;
+  background: color-mix(in srgb, #f87171 15%, transparent);
+}
 </style>
