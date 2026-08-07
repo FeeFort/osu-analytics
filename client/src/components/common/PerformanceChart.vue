@@ -1,7 +1,8 @@
 <script setup>
 import Select from 'primevue/select';
 import { usePerformanceChart } from '../../composables/usePerformanceChart';
-import { ArrowUp, ArrowDown } from '@lucide/vue';
+import { Activity, Trophy } from '@lucide/vue';
+import PerformanceMetricCard from './PerformanceMetricCard.vue';
 
 const {
   chartCanvas,
@@ -12,10 +13,9 @@ const {
   currentRank,
   ppDelta,
   rankDelta,
+  rankDeltaMagnitude,
+  rankImproved,
   formatMetricNumber,
-  formatDelta,
-  formatDeltaMagnitude,
-  deltaClass
 } = usePerformanceChart();
 </script>
 
@@ -39,25 +39,23 @@ const {
     </div>
     <div class="performance-content">
       <div class="performance-metrics">
-        <div class="performance-metric">
-          <span class="performance-metric-label">Current PP</span>
-          <strong class="performance-metric-value">
-            {{ formatMetricNumber(currentPp) }}
-            <small class="performance-metric-delta" :class="deltaClass(ppDelta)">({{ formatDelta(ppDelta) }})</small>
-          </strong>
-        </div>
-        <div class="performance-metric">
-          <span class="performance-metric-label">Global Rank</span>
-          <strong class="performance-metric-value">
-            #{{ formatMetricNumber(currentRank) }}
-            <small class="performance-metric-delta" :class="deltaClass(rankDelta)">
-              (
-              <ArrowUp v-if="rankDelta > 0" class="performance-metric-delta-icon" />
-              <ArrowDown v-else-if="rankDelta < 0" class="performance-metric-delta-icon" />
-              {{ formatDeltaMagnitude(rankDelta) }})
-            </small>
-          </strong>
-        </div>
+        <PerformanceMetricCard
+          label="Current PP"
+          :value="formatMetricNumber(currentPp)"
+          :delta="ppDelta"
+          :icon="Activity"
+          :positive="ppDelta > 0"
+          :negative="ppDelta < 0"
+        />
+        <PerformanceMetricCard
+          label="Global Rank"
+          :value="`#${formatMetricNumber(currentRank)}`"
+          :delta="rankDeltaMagnitude"
+          variant="arrow"
+          :icon="Trophy"
+          :positive="rankImproved"
+          :negative="!rankImproved && rankDelta !== 0"
+        />
       </div>
       <div class="performance-chart-placeholder">
         <canvas ref="chartCanvas" />
@@ -163,67 +161,24 @@ const {
 }
 .performance-content {
   display: grid;
-  grid-template-columns: 11.25rem minmax(0, 1fr);
-  gap: 1.5rem;
+  grid-template-columns: clamp(15rem, 22vw, 18rem) minmax(0, 1fr);
+  gap: 1.25rem;
   height: 22.5rem;
 }
 .performance-metrics {
   display: grid;
   grid-template-rows: 1fr 1fr;
+  min-width: 0;
   height: 100%;
-}
-.performance-metric {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 0.5rem;
-  min-width: 13.75rem;
-  padding: 1.5rem 0.75rem 1.5rem 1.5rem;
-}
-.performance-metric-label {
-  font-size: 0.813rem;
-  color: var(--p-text-muted-color);
-}
-.performance-metric-value {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.375rem;
-  min-width: 13.75rem;
-  white-space: nowrap;
-  font-size: 1.875rem;
-  font-weight: 700;
-  color: var(--p-text-color);
-}
-.performance-metric-delta {
-  font-size: 0.813rem;
-  font-weight: 500;
-  color: var(--p-text-muted-color);
-  white-space: nowrap;
-}
-.performance-metric-delta-neutral {
-  color: var(--p-text-muted-color);
-}
-.performance-metric-delta-positive {
-  color: #4ade80;
-}
-.performance-metric-delta-negative {
-  color: #f87171;
-}
-.performance-metric-delta-icon {
-  display: inline-block;
-  width: 1.05em;
-  height: 1.05em;
-  margin-right: 0.005em;
-  vertical-align: -0.15em;
-  stroke-width: 3;
+  gap: 0.75rem;
 }
 .performance-chart-placeholder {
   position: relative;
   min-height: 0;
   height: 100%;
-  width: calc(100% - 8rem);
-  margin-left: 4rem;
-  transform: translateX(4rem);
+  width: 100%;
+  margin-left: 0;
+  transform: none;
 }
 .performance-chart-placeholder canvas {
   width: 100% !important;
