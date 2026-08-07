@@ -1,5 +1,5 @@
 @theme inline {
-  --font-sans: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-sans: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --color-primary: var(--p-primary-color);
   --color-surface-0: var(--p-surface-0);
   --color-surface-50: var(--p-surface-50);
@@ -18,7 +18,7 @@
 }
 
 :root {
-  --app-font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --app-font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --app-background: var(--p-content-background, #fff);
   --app-text-color: var(--p-text-color, #131317);
   --app-muted-color: var(--p-text-muted-color, #5c5c6e);
@@ -45,9 +45,15 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-*, *::before, *::after { box-sizing: border-box; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 
-html, body, #app {
+html,
+body,
+#app {
   width: 100%;
   max-width: none;
   min-width: 0;
@@ -57,7 +63,10 @@ html, body, #app {
   margin: 0;
 }
 
-html { background: var(--app-background); }
+html {
+  background: var(--app-background);
+  font-size: 75%;
+}
 
 body {
   min-height: 100dvh;
@@ -66,14 +75,31 @@ body {
   color: var(--app-text-color);
 }
 
-button, input, textarea, select { font: inherit; }
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
 
-#app { min-height: 100dvh; padding: 0; }
-#app > * { display: flex; width: 100%; min-width: 0; min-height: 100dvh; flex: 1 1 auto; }
-#app > * > * { width: 100%; max-width: none; min-width: 0; }
+#app {
+  min-height: 100dvh;
+  padding: 0;
+}
+#app > * {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  min-height: 100dvh;
+  flex: 1 1 auto;
+}
+#app > * > * {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+}
 
-/* The theme composable toggles this class on html. Only named painted
-   surfaces animate; text, controls and canvas content switch immediately. */
+/* Animate only named painted surfaces during theme changes. */
 html.app-theme-transition body,
 html.app-theme-transition .app-theme-shell,
 html.app-theme-transition .app-shell-layout,
@@ -82,7 +108,8 @@ html.app-theme-transition .app-page-content,
 html.app-theme-transition .app-sidebar .p-sidebar-panel,
 html.app-theme-transition .app-user-menu,
 html.app-theme-transition .app-theme-surface {
-  transition: background-color var(--app-theme-duration) var(--app-theme-easing),
+  transition:
+    background-color var(--app-theme-duration) var(--app-theme-easing),
     border-color var(--app-theme-duration) var(--app-theme-easing),
     box-shadow var(--app-theme-duration) var(--app-theme-easing) !important;
 }
@@ -99,9 +126,15 @@ html.app-theme-transition .app-sidebar .p-sidebar-aside {
   transition: border-color var(--app-theme-duration) var(--app-theme-easing) !important;
 }
 
-/* Theme-dependent details that paint independently of their parent surface.
-   Keep this list explicit: applying transitions to the whole subtree causes
-   expensive repaints and overrides PrimeVue's interaction animations. */
+html.app-theme-transition .app-sidebar .app-sidebar-menu-button[data-active='true'] {
+  transition:
+    background var(--app-theme-duration) var(--app-theme-easing),
+    color var(--app-theme-duration) var(--app-theme-easing),
+    border-color var(--app-theme-duration) var(--app-theme-easing),
+    box-shadow var(--app-theme-duration) var(--app-theme-easing) !important;
+}
+
+/* Explicitly transition details that paint outside their parent surfaces. */
 html.app-theme-transition .app-sidebar-profile-item::before,
 html.app-theme-transition .app-sidebar-avatar,
 html.app-theme-transition .panel-placeholder,
@@ -118,13 +151,29 @@ html.app-theme-transition .performance-tooltip {
   transition-delay: 0ms !important;
 }
 
-.app-shell-layout { min-height: 100dvh; }
-.app-shell-layout > .p-sidebar-main { min-width: 0; margin-left: 0; }
-.app-page-content { display: flex; min-width: 0; min-height: 100%; flex: 1; flex-direction: column; padding: 1rem; overflow: auto; }
-.app-page-content--error { min-height: 100dvh; padding: 0; overflow: hidden; }
+.app-shell-layout {
+  min-height: 100dvh;
+}
+.app-shell-layout > .p-sidebar-main {
+  min-width: 0;
+  margin-left: 0;
+}
+.app-page-content {
+  display: flex;
+  min-width: 0;
+  min-height: 100%;
+  flex: 1;
+  flex-direction: column;
+  padding: 1rem;
+  overflow: auto;
+}
+.app-page-content--error {
+  min-height: 100dvh;
+  padding: 0;
+  overflow: hidden;
+}
 
-/* Fixed sidebar: PrimeVue's `collapsible="none"` is reinforced here so no
-   responsive or icon-mode rule can change its geometry. */
+/* Keep the sidebar geometry fixed in every mode. */
 .app-sidebar {
   --sidebar-width: var(--app-sidebar-width);
   --sidebar-width-icon: var(--app-sidebar-width);
@@ -140,14 +189,36 @@ html.app-theme-transition .performance-tooltip {
   flex: 0 0 var(--app-sidebar-width);
   transition: none;
 }
-.app-sidebar .p-sidebar-aside { position: fixed; inset: 0 auto 0 0; height: 100dvh; border-right-color: var(--p-content-border-color); transition: none; }
+.app-sidebar .p-sidebar-aside {
+  position: fixed;
+  inset: 0 auto 0 0;
+  height: 100dvh;
+  border-right-color: var(--p-content-border-color);
+  transition: none;
+}
 .app-sidebar .p-sidebar-panel,
 .app-sidebar .p-sidebar-header,
 .app-sidebar .p-sidebar-content,
-.app-sidebar .p-sidebar-footer { transition: none; }
+.app-sidebar .p-sidebar-footer {
+  transition: none;
+}
 
-.app-sidebar-logo-frame { display: block; width: 85%; max-width: 100%; margin-inline: auto; overflow: hidden; aspect-ratio: 966 / 145; flex: 0 0 auto; }
-.app-sidebar-logo { display: block; width: 100%; height: 100%; object-fit: contain; object-position: left center; }
+.app-sidebar-logo-frame {
+  display: block;
+  width: 85%;
+  max-width: 100%;
+  margin-inline: auto;
+  overflow: hidden;
+  aspect-ratio: 966 / 145;
+  flex: 0 0 auto;
+}
+.app-sidebar-logo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: left center;
+}
 
 .app-sidebar-menu-button {
   min-height: var(--app-control-height) !important;
@@ -161,53 +232,158 @@ html.app-theme-transition .performance-tooltip {
   transition-duration: var(--app-theme-duration) !important;
 }
 .app-sidebar-menu-button > svg,
-.app-sidebar-menu-icon { width: var(--app-control-icon-size) !important; height: var(--app-control-icon-size) !important; flex-shrink: 0; color: inherit !important; stroke: currentColor !important; fill: none; }
-.app-sidebar-menu-button[data-active="true"],
-.app-sidebar-menu-button[data-active="true"] > span,
-.app-sidebar-menu-button[data-active="true"] > svg,
+.app-sidebar-menu-icon {
+  width: var(--app-control-icon-size) !important;
+  height: var(--app-control-icon-size) !important;
+  flex-shrink: 0;
+  color: inherit !important;
+  stroke: currentColor !important;
+  fill: none;
+}
+.app-sidebar-menu-button[data-active='true'],
+.app-sidebar-menu-button[data-active='true'] > span,
+.app-sidebar-menu-button[data-active='true'] > svg,
 .app-sidebar-menu-button:hover,
 .app-sidebar-menu-button:hover > span,
-.app-sidebar-menu-button:hover > svg { color: var(--app-menu-hover-light) !important; }
-.app-dark .app-sidebar-menu-button { color: var(--app-menu-text-dark) !important; }
-.app-dark .app-sidebar-menu-button[data-active="true"],
-.app-dark .app-sidebar-menu-button[data-active="true"] > span,
-.app-dark .app-sidebar-menu-button[data-active="true"] > svg,
+.app-sidebar-menu-button:hover > svg {
+  color: var(--app-menu-hover-light) !important;
+}
+.app-dark .app-sidebar-menu-button {
+  color: var(--app-menu-text-dark) !important;
+}
+.app-dark .app-sidebar-menu-button[data-active='true'],
+.app-dark .app-sidebar-menu-button[data-active='true'] > span,
+.app-dark .app-sidebar-menu-button[data-active='true'] > svg,
 .app-dark .app-sidebar-menu-button:hover,
 .app-dark .app-sidebar-menu-button:hover > span,
-.app-dark .app-sidebar-menu-button:hover > svg { color: var(--app-menu-hover-dark) !important; }
-.app-sidebar-profile-chevron { margin-left: auto !important; margin-right: -0.5rem; color: var(--p-text-muted-color) !important; stroke: currentColor !important; }
-.app-sidebar-header-button { min-height: 3.25rem !important; height: 3.25rem !important; }
-.app-sidebar-header-button > span { font-size: 1.05rem; }
-.app-sidebar-group-label { padding-block: 0.75rem !important; font-size: 0.85rem !important; letter-spacing: 0.04em; }
-.app-sidebar-avatar { width: 2.25rem !important; height: 2.25rem !important; font-size: 0.85rem !important; }
-.app-sidebar-profile-item { position: relative; margin-top: 0.5rem; padding-top: 0.5rem; }
-.app-sidebar-profile-item::before { content: ''; position: absolute; inset: 0 0 auto; height: 1px; background: var(--p-content-border-color); }
+.app-dark .app-sidebar-menu-button:hover > svg {
+  color: var(--app-menu-hover-dark) !important;
+}
+.app-sidebar-profile-chevron {
+  margin-left: auto !important;
+  margin-right: -0.5rem;
+  color: var(--p-text-muted-color) !important;
+  stroke: currentColor !important;
+}
+.app-sidebar-header-button {
+  min-height: 3.25rem !important;
+  height: 3.25rem !important;
+}
+.app-sidebar-header-button > span {
+  font-size: 1.05rem;
+}
+.app-sidebar-group-label {
+  padding-block: 0.75rem !important;
+  font-size: 0.85rem !important;
+  letter-spacing: 0.04em;
+}
+.app-sidebar-avatar {
+  width: 2.25rem !important;
+  height: 2.25rem !important;
+  font-size: 0.85rem !important;
+}
+.app-sidebar-profile-item {
+  position: relative;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+}
+.app-sidebar-profile-item::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: var(--p-content-border-color);
+}
 
-.app-toast { width: min(28rem, calc(100vw - 2rem)); }
-.app-toast .p-toast-message { border: 1px solid color-mix(in srgb, var(--p-content-border-color) 70%, transparent); border-radius: 14px; background: color-mix(in srgb, var(--p-content-background) 92%, transparent); box-shadow: 0 18px 42px rgb(0 0 0 / 16%); backdrop-filter: blur(14px); }
-.app-toast .p-toast-message-content { padding: 1rem 1.1rem; }
-.app-toast .p-toast-summary { font-size: 0.95rem; font-weight: 700; }
-.app-toast .p-toast-detail { margin-top: 0.3rem; color: var(--p-text-muted-color); line-height: 1.45; }
+.app-toast {
+  width: min(28rem, calc(100vw - 2rem));
+}
+.app-toast .p-toast-message {
+  border: 1px solid color-mix(in srgb, var(--p-content-border-color) 70%, transparent);
+  border-radius: 0.875rem;
+  background: color-mix(in srgb, var(--p-content-background) 92%, transparent);
+  box-shadow: 0 18px 42px rgb(0 0 0 / 16%);
+  backdrop-filter: blur(14px);
+}
+.app-toast .p-toast-message-content {
+  padding: 1rem 1.1rem;
+}
+.app-toast .p-toast-summary {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+.app-toast .p-toast-detail {
+  margin-top: 0.3rem;
+  color: var(--p-text-muted-color);
+  line-height: 1.45;
+}
 
-.app-user-menu-leave-active { transition: opacity 100ms ease, transform 100ms ease !important; }
-.app-user-menu-leave-from { opacity: 1; transform: translateY(0); }
-.app-user-menu-leave-to { opacity: 0; transform: translateY(2px); }
+.app-user-menu-leave-active {
+  transition:
+    opacity 100ms ease,
+    transform 100ms ease !important;
+}
+.app-user-menu-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+}
+.app-user-menu-leave-to {
+  opacity: 0;
+  transform: translateY(0.125rem);
+}
 .app-user-menu .p-menu-item-content,
-.app-user-menu .p-menu-item-link { min-height: var(--app-control-height); }
-.app-user-menu .p-menu-item-link { gap: var(--app-control-gap); padding-block: 0.75rem; font-size: 1.05rem; line-height: 1.25; color: var(--app-menu-text-light) !important; transition: color var(--app-theme-duration) ease, background-color var(--app-theme-duration) ease; }
-.app-user-menu .p-menu-item-label { font-size: 1.05rem; line-height: 1.25; color: inherit; }
-.app-user-menu .p-menu-item-icon { width: var(--app-control-icon-size); height: var(--app-control-icon-size); font-size: var(--app-control-icon-size); flex-shrink: 0; color: inherit; stroke: currentColor; fill: none; }
-.app-user-menu .p-menu-item-icon svg { width: var(--app-control-icon-size); height: var(--app-control-icon-size); }
+.app-user-menu .p-menu-item-link {
+  min-height: var(--app-control-height);
+}
+.app-user-menu .p-menu-item-link {
+  gap: var(--app-control-gap);
+  padding-block: 0.75rem;
+  font-size: 1.05rem;
+  line-height: 1.25;
+  color: var(--app-menu-text-light) !important;
+  transition:
+    color var(--app-theme-duration) ease,
+    background-color var(--app-theme-duration) ease;
+}
+.app-user-menu .p-menu-item-label {
+  font-size: 1.05rem;
+  line-height: 1.25;
+  color: inherit;
+}
+.app-user-menu .p-menu-item-icon {
+  width: var(--app-control-icon-size);
+  height: var(--app-control-icon-size);
+  font-size: var(--app-control-icon-size);
+  flex-shrink: 0;
+  color: inherit;
+  stroke: currentColor;
+  fill: none;
+}
+.app-user-menu .p-menu-item-icon svg {
+  width: var(--app-control-icon-size);
+  height: var(--app-control-icon-size);
+}
 .app-user-menu .p-menu-item-link:hover,
 .app-user-menu .p-menu-item-link:hover .p-menu-item-label,
-.app-user-menu .p-menu-item-link:hover .p-menu-item-icon { color: var(--app-menu-hover-light) !important; }
-.app-dark .app-user-menu .p-menu-item-link { color: var(--app-menu-text-dark) !important; }
+.app-user-menu .p-menu-item-link:hover .p-menu-item-icon {
+  color: var(--app-menu-hover-light) !important;
+}
+.app-dark .app-user-menu .p-menu-item-link {
+  color: var(--app-menu-text-dark) !important;
+}
 .app-dark .app-user-menu .p-menu-item-link:hover,
 .app-dark .app-user-menu .p-menu-item-link:hover .p-menu-item-label,
-.app-dark .app-user-menu .p-menu-item-link:hover .p-menu-item-icon { color: var(--app-menu-hover-dark) !important; }
+.app-dark .app-user-menu .p-menu-item-link:hover .p-menu-item-icon {
+  color: var(--app-menu-hover-dark) !important;
+}
 .app-user-menu .app-user-menu-logout,
 .app-user-menu .app-user-menu-logout:hover,
 .app-user-menu .app-user-menu-logout .p-menu-item-label,
 .app-user-menu .app-user-menu-logout .p-menu-item-icon,
-.app-user-menu .app-user-menu-logout svg { color: var(--app-danger) !important; stroke: currentColor !important; }
-.app-user-menu .app-user-menu-logout:hover { color: var(--app-danger-hover) !important; }
+.app-user-menu .app-user-menu-logout svg {
+  color: var(--app-danger) !important;
+  stroke: currentColor !important;
+}
+.app-user-menu .app-user-menu-logout:hover {
+  color: var(--app-danger-hover) !important;
+}

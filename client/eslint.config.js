@@ -1,5 +1,7 @@
-import js from '@eslint/js'
-import vue from 'eslint-plugin-vue'
+import js from '@eslint/js';
+import vue from 'eslint-plugin-vue';
+import globals from 'globals';
+import eslintConfigPrettier from 'eslint-config-prettier';
 
 export default [
   { ignores: ['dist/**', 'node_modules/**'] },
@@ -11,23 +13,18 @@ export default [
       ecmaVersion: 'latest',
       sourceType: 'module',
       globals: {
-        browser: true,
-        document: 'readonly',
-        window: 'readonly',
-        clearTimeout: 'readonly',
-        cancelAnimationFrame: 'readonly',
-        requestAnimationFrame: 'readonly',
-        getComputedStyle: 'readonly',
-        performance: 'readonly'
+        ...globals.browser
       }
     },
     rules: {
-      'no-unused-vars': 'off',
-      'no-undef': 'off',
-      'no-irregular-whitespace': 'off',
-      'vue/no-unused-vars': 'off',
-      'vue/no-parsing-error': 'off',
       'vue/multi-word-component-names': 'off',
+      'vue/no-undef-components': [
+        'error',
+        {
+          ignorePatterns: ['router-view', 'router-link']
+        }
+      ],
+      // Formatting is fully through Prettier. Turned off as these would've been conlficting.
       'vue/html-indent': 'off',
       'vue/max-attributes-per-line': 'off',
       'vue/attribute-hyphenation': 'off',
@@ -36,5 +33,6 @@ export default [
       'vue/multiline-html-element-content-newline': 'off',
       'vue/attributes-order': 'off'
     }
-  }
-]
+  },
+  eslintConfigPrettier
+];

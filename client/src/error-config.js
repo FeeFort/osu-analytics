@@ -1,5 +1,5 @@
 const errorStates = {
-  '400': {
+  400: {
     code: '400',
     mode: 'toast',
     title: 'Bad request.',
@@ -7,7 +7,7 @@ const errorStates = {
     severity: 'warn',
     life: 4200
   },
-  '401': {
+  401: {
     code: '401',
     mode: 'page',
     title: 'Sign in to continue.',
@@ -15,7 +15,7 @@ const errorStates = {
     actionLabel: 'Go back home',
     action: 'home'
   },
-  '403': {
+  403: {
     code: '403',
     mode: 'page',
     title: 'Access denied.',
@@ -23,7 +23,7 @@ const errorStates = {
     actionLabel: 'Go back home',
     action: 'home'
   },
-  '404': {
+  404: {
     code: '404',
     mode: 'page',
     title: 'Oops! Page not found.',
@@ -31,7 +31,7 @@ const errorStates = {
     actionLabel: 'Go back home',
     action: 'home'
   },
-  '408': {
+  408: {
     code: '408',
     mode: 'toast',
     title: 'Request timed out.',
@@ -39,7 +39,7 @@ const errorStates = {
     severity: 'secondary',
     life: 4200
   },
-  '429': {
+  429: {
     code: '429',
     mode: 'toast',
     title: 'Too many requests.',
@@ -47,7 +47,7 @@ const errorStates = {
     severity: 'contrast',
     life: 4600
   },
-  '500': {
+  500: {
     code: '500',
     mode: 'page',
     title: 'Something went wrong.',
@@ -55,7 +55,7 @@ const errorStates = {
     actionLabel: 'Try again',
     action: 'retry'
   },
-  '502': {
+  502: {
     code: '502',
     mode: 'page',
     title: 'Bad gateway.',
@@ -63,7 +63,7 @@ const errorStates = {
     actionLabel: 'Try again',
     action: 'retry'
   },
-  '503': {
+  503: {
     code: '503',
     mode: 'page',
     title: 'Service temporarily unavailable.',
@@ -71,7 +71,7 @@ const errorStates = {
     actionLabel: 'Try again',
     action: 'retry'
   },
-  '504': {
+  504: {
     code: '504',
     mode: 'page',
     title: 'Gateway timed out.',
@@ -79,18 +79,18 @@ const errorStates = {
     actionLabel: 'Try again',
     action: 'retry'
   }
-}
+};
 
-const fallbackErrorState = errorStates['500']
+const fallbackErrorState = errorStates['500'];
 
 export function getErrorState(code) {
-  return errorStates[String(code)] ?? fallbackErrorState
+  return errorStates[String(code)] ?? fallbackErrorState;
 }
 
 export function isToastErrorCode(code) {
-  return getErrorState(code).mode === 'toast'
+  return getErrorState(code).mode === 'toast';
 }
 
 export function isPageErrorCode(code) {
-  return getErrorState(code).mode === 'page'
+  return getErrorState(code).mode === 'page';
 }

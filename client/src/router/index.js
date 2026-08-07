@@ -1,5 +1,5 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import { getErrorState, isToastErrorCode } from '../error-config'
+import { createRouter, createWebHistory } from 'vue-router';
+import { getErrorState, isToastErrorCode } from '../error-config';
 
 const routes = [
   {
@@ -39,22 +39,20 @@ const routes = [
       query: { from: to.fullPath }
     })
   }
-]
+];
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
   scrollBehavior() {
-    return { top: 0 }
+    return { top: 0 };
   }
-})
+});
 
 router.beforeEach((to) => {
   if (to.name === 'error' && isToastErrorCode(to.params.code)) {
-    const fromPath = typeof to.query.from === 'string' && to.query.from !== to.fullPath
-      ? to.query.from
-      : '/'
-    const resolved = router.resolve(fromPath)
+    const fromPath = typeof to.query.from === 'string' && to.query.from !== to.fullPath ? to.query.from : '/';
+    const resolved = router.resolve(fromPath);
 
     return {
       path: resolved.path,
@@ -63,14 +61,12 @@ router.beforeEach((to) => {
         errorToast: String(to.params.code)
       },
       hash: resolved.hash
-    }
+    };
   }
 
-  const pageTitle = to.name === 'error'
-    ? getErrorState(to.params.code).title
-    : to.meta.title
+  const pageTitle = to.name === 'error' ? getErrorState(to.params.code).title : to.meta.title;
 
-  document.title = pageTitle ? `${pageTitle} - MySite` : 'MySite'
-})
+  document.title = pageTitle ? `${pageTitle} - MySite` : 'MySite';
+});
 
-export default router
+export default router;

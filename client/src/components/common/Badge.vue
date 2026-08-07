@@ -2,16 +2,14 @@
 defineProps({
   label: { type: String, required: true },
   color: { type: String, default: '#f8894d' },
-  paths: { type: Array, default: () => [] },
+  icon: { type: [Object, Function], default: null },
   reverse: { type: Boolean, default: false }
-})
+});
 </script>
 
 <template>
   <span class="badge" :class="{ 'badge--reverse': reverse }" :style="{ '--badge-color': color }">
-    <svg class="badge-icon" viewBox="0 0 24 24" aria-hidden="true">
-      <path v-for="(path, index) in paths" :key="index" :d="path" />
-    </svg>
+    <component :is="icon" v-if="icon" class="badge-icon" aria-hidden="true" />
     <span class="badge-label">{{ label }}</span>
   </span>
 </template>
@@ -21,14 +19,14 @@ defineProps({
   --badge-color: #f8894d;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  min-height: 30px;
-  padding: 6px 11px;
-  border: 2px solid color-mix(in srgb, var(--badge-color) 35%, transparent);
-  border-radius: 8px;
+  gap: 0.5rem;
+  min-height: 1.875rem;
+  padding: 0.375rem 0.688rem;
+  border: 0.125rem solid color-mix(in srgb, var(--badge-color) 35%, transparent);
+  border-radius: 0.5rem;
   color: var(--badge-color);
   background: color-mix(in srgb, var(--badge-color) 14%, var(--p-content-background));
-  font-size: 13px;
+  font-size: 0.813rem;
   font-weight: 700;
   line-height: 1;
   letter-spacing: 0.01em;
@@ -42,8 +40,8 @@ defineProps({
 }
 
 .badge-icon {
-  width: 18px;
-  height: 18px;
+  width: 1.125rem;
+  height: 1.125rem;
   flex: 0 0 auto;
   display: block;
   fill: none;
