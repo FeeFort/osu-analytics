@@ -30,6 +30,10 @@ export function usePerformanceChart() {
     year: 360
   };
 
+  function getQualityDelta(metric, rawDelta) {
+    return metric === 'rank' ? -rawDelta : rawDelta;
+  }
+
   function createDailyChartData(days, basePp, baseRank) {
     const endDate = new Date();
     const labels = [];
@@ -60,10 +64,10 @@ export function usePerformanceChart() {
   const masterChartData = createDailyChartData(periodDays.year, 520, 1240);
   const currentPp = 566;
   const currentRank = 849000;
-  const ppDelta = masterChartData.pp.at(-1) - masterChartData.pp.at(-2);
-  const rankDelta = (masterChartData.rank.at(-1) - masterChartData.rank.at(-2)) * 1000;
+  const ppDelta = getQualityDelta('pp', masterChartData.pp.at(-1) - masterChartData.pp.at(-2));
+  const rankDelta = getQualityDelta('rank', (masterChartData.rank.at(-1) - masterChartData.rank.at(-2)) * 1000);
   const activeChartData = () => masterChartData;
-  const externalTooltipHandler = createExternalTooltipHandler(activeChartData, () => selectedMetric.value);
+  const externalTooltipHandler = createExternalTooltipHandler(activeChartData, () => selectedMetric.value, getQualityDelta);
   const crosshairPlugin = createCrosshairPlugin(
     () => isPeriodTransitioning,
     (variable, fallback) => getCssColor(variable, fallback, chartCanvas)
@@ -77,14 +81,14 @@ export function usePerformanceChart() {
     return `${value >= 0 ? '+' : '−'}${formatMetricNumber(value)}`;
   }
 
+  function formatDeltaMagnitude(value) {
+    return formatMetricNumber(Math.abs(value))
+  }
+
   function deltaClass(value) {
     if (value > 0) return 'performance-metric-delta-positive';
     if (value < 0) return 'performance-metric-delta-negative';
     return 'performance-metric-delta-neutral';
-  }
-
-  function toPlotValue(metric, value) {
-    return metric === 'rank' ? -value : value;
   }
 
   function getChartRange(period = selectedPeriod.value) {
@@ -99,7 +103,7 @@ export function usePerformanceChart() {
   }
 
   function getYRange(period, metric = selectedMetric.value) {
-    const values = masterChartData[metric].slice(-periodDays[period]).map((value) => toPlotValue(metric, value));
+    const values = masterChartData[metric].slice(-periodDays[period]).map((value) => getQualityDelta(metric, value));
     const min = Math.min(...values);
     const max = Math.max(...values);
     const padding = (max - min || Math.max(Math.abs(max) * 0.1, 1)) * 0.1;
@@ -109,7 +113,7 @@ export function usePerformanceChart() {
   function getFullDataset(metric = selectedMetric.value) {
     return masterChartData[metric].map((value, index) => ({
       x: masterChartData.offsets[index],
-      y: toPlotValue(metric, value)
+      y: getQualityDelta(metric, value)
     }));
   }
 
@@ -349,6 +353,7 @@ export function usePerformanceChart() {
     rankDelta,
     formatMetricNumber,
     formatDelta,
+    formatDeltaMagnitude,
     deltaClass
   };
 }

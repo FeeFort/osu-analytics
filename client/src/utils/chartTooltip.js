@@ -44,7 +44,7 @@ export function getCssEase(progress) {
   return sample((lower + upper) / 2, 0.1, 1);
 }
 
-export function createExternalTooltipHandler(getActiveChartData, getSelectedMetric) {
+export function createExternalTooltipHandler(getActiveChartData, getSelectedMetric, getQualityDelta) {
   return ({ chart, tooltip }) => {
     const parent = chart.canvas.parentNode;
     let element = parent.querySelector('.performance-tooltip');
@@ -60,22 +60,28 @@ export function createExternalTooltipHandler(getActiveChartData, getSelectedMetr
       return;
     }
 
+    const CHEVRON_UP = `<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="performance-tooltip-chevron"><path d="m18 15-6-6-6 6" /></svg>`
+    const CHEVRON_DOWN = `<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="performance-tooltip-chevron"><path d="m6 9 6 6 6-6" /></svg>`
     const index = tooltip.dataPoints?.[0]?.dataIndex;
     const data = getActiveChartData();
     const metric = getSelectedMetric();
-    const isPp = metric === 'pp';
+    const isRank = metric === 'rank';
     const values = data?.[metric] || [];
     const value = values[index];
     const previous = index > 0 ? values[index - 1] : value;
-    const change = value - previous;
+    const rawChange = value - previous;
+    const change = getQualityDelta(metric, rawChange);
+    const magnitude = Math.abs(rawChange);
     const sign = change > 0 ? '+' : '';
+    const deltaClass = change > 0 ? 'is-positive' : change < 0 ? 'is-negative' : 'is-neutral';
+    const changeMarkup = isRank ? (change > 0 ? CHEVRON_UP : change < 0 ? CHEVRON_DOWN : '') : ''
 
     element.innerHTML = `
       <span class="performance-tooltip-date">${data.labels[index]}</span>
-      <span class="performance-tooltip-value">${isPp ? 'PP' : 'Rank'}: ${isPp ? value : `#${value}`}</span>
+      <span class="performance-tooltip-value">${isRank ? 'Rank' : 'PP'}: ${isRank ? `#${value}` : value}</span>
       <span class="performance-tooltip-change">
         <span class="performance-tooltip-change-label">Change:</span>
-        <span>${isPp ? `${sign}${change}pp` : `${sign}${change}`}</span>
+        <span class="performance-tooltip-change-value ${deltaClass}">${changeMarkup}${isRank ? magnitude : `${sign}${change}pp`}</span>
       </span>
     `;
     element.style.opacity = '1';

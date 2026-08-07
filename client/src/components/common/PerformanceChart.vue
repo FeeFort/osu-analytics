@@ -1,6 +1,7 @@
 <script setup>
 import Select from 'primevue/select';
 import { usePerformanceChart } from '../../composables/usePerformanceChart';
+import { ChevronUp, ChevronDown } from '@lucide/vue';
 
 const {
   chartCanvas,
@@ -13,6 +14,7 @@ const {
   rankDelta,
   formatMetricNumber,
   formatDelta,
+  formatDeltaMagnitude,
   deltaClass
 } = usePerformanceChart();
 </script>
@@ -48,7 +50,7 @@ const {
           <span class="performance-metric-label">Global Rank</span>
           <strong class="performance-metric-value">
             #{{ formatMetricNumber(currentRank) }}
-            <small class="performance-metric-delta" :class="deltaClass(rankDelta)">({{ formatDelta(rankDelta) }})</small>
+            <small class="performance-metric-delta" :class="deltaClass(rankDelta)">(<ChevronUp v-if="rankDelta > 0" class="performance-metric-delta-icon" /><ChevronDown v-else-if="rankDelta < 0" class="performance-metric-delta-icon" />{{ formatDeltaMagnitude(rankDelta) }})</small>
           </strong>
         </div>
       </div>
@@ -202,6 +204,14 @@ const {
 .performance-metric-delta-negative {
   color: #f87171;
 }
+.performance-metric-delta-icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin-right: 0.0625em;
+  vertical-align: -0.1em;
+  stroke-width: 3;
+}
 .performance-chart-placeholder {
   position: relative;
   min-height: 0;
@@ -236,6 +246,13 @@ const {
   transition-delay: 0ms;
   will-change: transform, opacity;
 }
+:global(.performance-tooltip-chevron) {
+  width: 1.2em;
+  height: 1.2em;
+  display: inline-block;
+  vertical-align: -0.2em;
+  flex-shrink: 0;
+}
 :global(.performance-tooltip-date),
 :global(.performance-tooltip-value),
 :global(.performance-tooltip-change) {
@@ -261,13 +278,13 @@ const {
 :global(.performance-tooltip-change-label) {
   color: var(--p-text-color);
 }
-:global(.performance-tooltip-change.is-positive) {
+:global(.performance-tooltip-change-value.is-positive) {
   color: #4ade80;
 }
-:global(.performance-tooltip-change.is-negative) {
+:global(.performance-tooltip-change-value.is-negative) {
   color: #f87171;
 }
-:global(.performance-tooltip-change.is-neutral) {
+:global(.performance-tooltip-change-value.is-neutral) {
   color: var(--p-text-muted-color);
 }
 @media (max-width: 900px) {
