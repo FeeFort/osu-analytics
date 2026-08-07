@@ -82,7 +82,7 @@ export function usePerformanceChart() {
   }
 
   function formatDeltaMagnitude(value) {
-    return formatMetricNumber(Math.abs(value))
+    return formatMetricNumber(Math.abs(value));
   }
 
   function deltaClass(value) {

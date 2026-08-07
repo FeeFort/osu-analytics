@@ -50,7 +50,12 @@ const {
           <span class="performance-metric-label">Global Rank</span>
           <strong class="performance-metric-value">
             #{{ formatMetricNumber(currentRank) }}
-            <small class="performance-metric-delta" :class="deltaClass(rankDelta)">(<ChevronUp v-if="rankDelta > 0" class="performance-metric-delta-icon" /><ChevronDown v-else-if="rankDelta < 0" class="performance-metric-delta-icon" />{{ formatDeltaMagnitude(rankDelta) }})</small>
+            <small class="performance-metric-delta" :class="deltaClass(rankDelta)">
+              (
+              <ChevronUp v-if="rankDelta > 0" class="performance-metric-delta-icon" />
+              <ChevronDown v-else-if="rankDelta < 0" class="performance-metric-delta-icon" />
+              {{ formatDeltaMagnitude(rankDelta) }})
+            </small>
           </strong>
         </div>
       </div>
