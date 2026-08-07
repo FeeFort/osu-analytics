@@ -105,8 +105,8 @@ const formattedDelta = computed(() => Math.abs(props.delta).toLocaleString('en-U
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.3rem;
-  min-width: 4.4rem;
+  gap: 0.2rem;
+  min-width: 3rem;
   min-height: 2rem;
   padding: 0.35rem 0.65rem;
   border-radius: 0.55rem;
@@ -116,7 +116,7 @@ const formattedDelta = computed(() => Math.abs(props.delta).toLocaleString('en-U
   white-space: nowrap;
 }
 .metric-delta > span {
-  transform: translateY(1px);
+  transform: translateY(0.1em);
 }
 .metric-delta--up {
   color: #16a34a;
