@@ -91,6 +91,9 @@ export function usePerformanceChart() {
     return 'performance-metric-delta-neutral';
   }
 
+  const rankDeltaMagnitude = Math.abs(rankDelta);
+  const rankImproved = rankDelta > 0;
+
   function getChartRange(period = selectedPeriod.value) {
     return { min: -(periodDays[period] - 1), max: 0 };
   }
@@ -351,6 +354,8 @@ export function usePerformanceChart() {
     currentRank,
     ppDelta,
     rankDelta,
+    rankDeltaMagnitude,
+    rankImproved,
     formatMetricNumber,
     formatDelta,
     formatDeltaMagnitude,
