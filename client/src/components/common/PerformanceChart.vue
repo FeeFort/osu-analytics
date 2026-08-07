@@ -1,7 +1,7 @@
 <script setup>
 import Select from 'primevue/select';
 import { usePerformanceChart } from '../../composables/usePerformanceChart';
-import { ChevronUp, ChevronDown } from '@lucide/vue';
+import { ArrowUp, ArrowDown } from '@lucide/vue';
 
 const {
   chartCanvas,
@@ -52,8 +52,8 @@ const {
             #{{ formatMetricNumber(currentRank) }}
             <small class="performance-metric-delta" :class="deltaClass(rankDelta)">
               (
-              <ChevronUp v-if="rankDelta > 0" class="performance-metric-delta-icon" />
-              <ChevronDown v-else-if="rankDelta < 0" class="performance-metric-delta-icon" />
+              <ArrowUp v-if="rankDelta > 0" class="performance-metric-delta-icon" />
+              <ArrowDown v-else-if="rankDelta < 0" class="performance-metric-delta-icon" />
               {{ formatDeltaMagnitude(rankDelta) }})
             </small>
           </strong>
@@ -211,10 +211,10 @@ const {
 }
 .performance-metric-delta-icon {
   display: inline-block;
-  width: 1em;
-  height: 1em;
-  margin-right: 0.0625em;
-  vertical-align: -0.1em;
+  width: 1.05em;
+  height: 1.05em;
+  margin-right: 0.005em;
+  vertical-align: -0.15em;
   stroke-width: 3;
 }
 .performance-chart-placeholder {
@@ -251,11 +251,11 @@ const {
   transition-delay: 0ms;
   will-change: transform, opacity;
 }
-:global(.performance-tooltip-chevron) {
-  width: 1.2em;
-  height: 1.2em;
+:global(.performance-tooltip-arrow) {
+  width: 1.05em;
+  height: 1.05em;
   display: inline-block;
-  vertical-align: -0.2em;
+  vertical-align: -0.205em;
   flex-shrink: 0;
 }
 :global(.performance-tooltip-date),

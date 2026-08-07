@@ -60,8 +60,8 @@ export function createExternalTooltipHandler(getActiveChartData, getSelectedMetr
       return;
     }
 
-    const CHEVRON_UP = `<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="performance-tooltip-chevron"><path d="m18 15-6-6-6 6" /></svg>`;
-    const CHEVRON_DOWN = `<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="performance-tooltip-chevron"><path d="m6 9 6 6 6-6" /></svg>`;
+    const ARROW_UP = `<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="performance-tooltip-arrow"><path d="M12 19V5" /><path d="m5 12 7-7 7 7" /></svg>`;
+    const ARROW_DOWN = `<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="performance-tooltip-arrow"><path d="M12 5v14" /><path d="m19 12-7 7-7-7" /></svg>`;
     const index = tooltip.dataPoints?.[0]?.dataIndex;
     const data = getActiveChartData();
     const metric = getSelectedMetric();
@@ -74,7 +74,7 @@ export function createExternalTooltipHandler(getActiveChartData, getSelectedMetr
     const magnitude = Math.abs(rawChange);
     const sign = change > 0 ? '+' : '';
     const deltaClass = change > 0 ? 'is-positive' : change < 0 ? 'is-negative' : 'is-neutral';
-    const changeMarkup = isRank ? (change > 0 ? CHEVRON_UP : change < 0 ? CHEVRON_DOWN : '') : '';
+    const changeMarkup = isRank ? (change > 0 ? ARROW_UP : change < 0 ? ARROW_DOWN : '') : '';
 
     element.innerHTML = `
       <span class="performance-tooltip-date">${data.labels[index]}</span>
