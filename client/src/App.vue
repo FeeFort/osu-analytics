@@ -1,3 +1,4 @@
+<!-- Main App, this comment only for test Lint CI/CD workflow -->
 <script setup>
 import SidebarMain from 'primevue/sidebarmain';
 import SidebarLayout from 'primevue/sidebarlayout';
