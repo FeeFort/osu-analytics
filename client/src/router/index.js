@@ -1,11 +1,23 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { getErrorState, isToastErrorCode } from '../error-config';
+import { useAuth } from '../composables/useAuth.js';
 
 const routes = [
   {
     path: '/',
     component: () => import('../views/Profile.vue'),
     meta: { title: 'Profile' }
+  },
+  {
+    path: '/admin',
+    component: () => import('../views/admin/AdminLayout.vue'),
+    meta: { adminOnly: true },
+    children: [
+      { path: '', redirect: '/admin/badges' },
+      { path: 'badges', component: () => import('../views/admin/AdminBadges.vue') },
+      { path: 'news', component: () => import('../views/admin/AdminNews.vue') },
+      { path: 'users', component: () => import('../views/admin/AdminUsers.vue') }
+    ]
   },
   {
     path: '/compare',
@@ -62,6 +74,12 @@ router.beforeEach((to) => {
       },
       hash: resolved.hash
     };
+  }
+  if (to.meta.adminOnly) {
+    const { isAdmin } = useAuth()
+    if (!isAdmin.value) {
+      return { name: 'error', params: { code: '403' }, query: { from: to.fullPath } }
+    }
   }
 
   const pageTitle = to.name === 'error' ? getErrorState(to.params.code).title : to.meta.title;

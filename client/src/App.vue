@@ -1,4 +1,3 @@
-<!-- Main App, this comment only for test Lint CI/CD workflow -->
 <script setup>
 import SidebarMain from 'primevue/sidebarmain';
 import SidebarLayout from 'primevue/sidebarlayout';
@@ -13,6 +12,7 @@ import AppUserMenu from './components/layout/AppUserMenu.vue';
 const router = useRouter();
 const route = useRoute();
 const isErrorRoute = computed(() => route.meta.isErrorPage === true);
+const adminOnly = computed(() => route.meta.adminOnly === true)
 const shouldUseFullPageError = computed(() => isErrorRoute.value && isPageErrorCode(route.params.code));
 const toast = useToast();
 const handledToastKey = ref('');
@@ -58,6 +58,8 @@ watch(
   <main v-if="shouldUseFullPageError" class="app-page-content app-page-content--error">
     <router-view />
   </main>
+
+  <router-view v-else-if="adminOnly" />
 
   <div v-else class="app-theme-shell app-theme-surface border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden">
     <SidebarLayout class="app-shell-layout min-h-192! relative!">

@@ -13,17 +13,20 @@ import SidebarMenuItem from 'primevue/sidebarmenuitem';
 import SidebarPanel from 'primevue/sidebarpanel';
 import SidebarSpacer from 'primevue/sidebarspacer';
 import { computed } from 'vue';
-import { Info, Newspaper, Scale, Search } from '@lucide/vue';
+import { Info, Newspaper, Scale, Search, ShieldCheck } from '@lucide/vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useTheme } from '../../composables/useTheme';
+import { useAuth } from '../../composables/useAuth'
 import logoLight from '../../assets/logo-light.png';
 import logoDark from '../../assets/logo-dark.png';
 
 const route = useRoute();
 const router = useRouter();
 const { isDark } = useTheme();
+const { isAdmin } = useAuth()
 const logo = computed(() => (isDark.value ? logoDark : logoLight));
-const navGroups = [
+
+const navGroups = computed(() => [
   {
     label: 'Navigation',
     items: [
@@ -34,8 +37,14 @@ const navGroups = [
   {
     label: 'Analytics',
     items: [{ label: 'Compare', icon: Scale, path: '/compare', exact: false }]
+  },
+  {
+    label: 'Management',
+    requiresAdmin: true,
+    items: [{ label: 'Admin', icon: ShieldCheck, path: '/admin', exact: false }]
   }
-];
+].filter((group) => !group.requiresAdmin || isAdmin.value))
+
 function isActive(item) {
   return item.exact ? route.path === item.path : route.path.startsWith(item.path);
 }
