@@ -9,7 +9,7 @@ const errorStates = {
   },
   401: {
     code: '401',
-    mode: 'page',
+    mode: 'page-shell',
     title: 'Sign in to continue.',
     text: 'Your session has expired or this page is available to signed-in users only.',
     actionLabel: 'Go back home',
@@ -17,7 +17,7 @@ const errorStates = {
   },
   403: {
     code: '403',
-    mode: 'page',
+    mode: 'page-shell',
     title: 'Access denied.',
     text: 'You do not have permission to view this page.',
     actionLabel: 'Go back home',
@@ -25,7 +25,7 @@ const errorStates = {
   },
   404: {
     code: '404',
-    mode: 'page',
+    mode: 'page-shell',
     title: 'Oops! Page not found.',
     text: "The page you're looking for doesn't exist or has been moved. Let's get you back on track.",
     actionLabel: 'Go back home',
@@ -92,5 +92,9 @@ export function isToastErrorCode(code) {
 }
 
 export function isPageErrorCode(code) {
+  return getErrorState(code).mode === 'page-shell' || isStandaloneErrorCode(code);
+}
+
+export function isStandaloneErrorCode(code) {
   return getErrorState(code).mode === 'page';
 }
