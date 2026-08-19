@@ -55,10 +55,9 @@ const formattedDelta = computed(() => Math.abs(props.delta).toLocaleString('en-U
   padding: 1.25rem;
   border: 1px solid var(--p-content-border-color);
   border-radius: 0.75rem;
-  background: color-mix(in srgb, var(--p-content-background) 96%, black 4%);
-}
-:global(.app-dark) .performance-metric {
-  background: color-mix(in srgb, var(--p-content-background) 92%, black 8%);
+  background: var(--app-performance-card-background);
+  border-color: var(--app-performance-card-border);
+  box-shadow: var(--app-performance-card-shadow);
 }
 
 .performance-metric-copy {
