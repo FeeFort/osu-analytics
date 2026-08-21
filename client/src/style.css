@@ -36,6 +36,9 @@
   --app-menu-hover-dark: #fff;
   --app-danger: #ef4444;
   --app-danger-hover: #dc2626;
+  --app-performance-card-background: #f7f8fa;
+  --app-performance-card-border: #dfe3eb;
+  --app-performance-card-shadow: 0 2px 8px rgb(15 23 42 / 4%);
   font-family: var(--app-font-family);
   line-height: 1.5;
   font-weight: 400;
@@ -250,6 +253,12 @@ html.app-theme-transition .performance-tooltip {
 }
 .app-dark .app-sidebar-menu-button {
   color: var(--app-menu-text-dark) !important;
+}
+
+.app-dark {
+  --app-performance-card-background: color-mix(in srgb, var(--p-content-background) 92%, black 8%);
+  --app-performance-card-border: var(--p-content-border-color);
+  --app-performance-card-shadow: none;
 }
 .app-dark .app-sidebar-menu-button[data-active='true'],
 .app-dark .app-sidebar-menu-button[data-active='true'] > span,
