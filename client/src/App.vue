@@ -6,14 +6,14 @@ import Toast from 'primevue/toast';
 import { computed, nextTick, ref, watch } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import { useRouter, useRoute } from 'vue-router';
-import { getErrorState, isPageErrorCode } from './error-config';
+import { getErrorState, isPageErrorCode, isStandaloneErrorCode } from './error-config';
 import AppSidebar from './components/layout/AppSidebar.vue';
 import AppUserMenu from './components/layout/AppUserMenu.vue';
 
 const router = useRouter();
 const route = useRoute();
 const isErrorRoute = computed(() => route.meta.isErrorPage === true);
-const shouldUseFullPageError = computed(() => isErrorRoute.value && isPageErrorCode(route.params.code));
+const shouldUseFullPageError = computed(() => isErrorRoute.value && isStandaloneErrorCode(route.params.code));
 const toast = useToast();
 const handledToastKey = ref('');
 
